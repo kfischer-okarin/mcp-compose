@@ -15,6 +15,32 @@ describe MCPCompose::ServerBuilder do
     value(server.name).must_equal "test"
   end
 
+  specify "the server returns the tools of the specified servers" do
+    config = a_valid_config(
+      with: {
+        servers: {
+          knowledge_base: {
+            command: "./start-my-knowledge-base.sh"
+          },
+          another_server: {
+            command: "./start-another-server.sh"
+          }
+        }
+      }
+    )
+    knowledge_base_client = Minitest::Mock.new
+    knowledge_base_client.expect(:list_tools, [:a, :b])
+    client_builder.expect(:build, knowledge_base_client, [{command: "./start-my-knowledge-base.sh"}])
+    another_server_client = Minitest::Mock.new
+    another_server_client.expect(:list_tools, [:c, :d])
+    client_builder.expect(:build, another_server_client, [{command: "./start-another-server.sh"}])
+
+    server = build_server(config: config)
+
+    value(list_server_tools(server)).must_equal [:a, :b, :c, :d]
+    value(client_builder).must_verify
+  end
+
   private
 
   def build_server(config:)
@@ -22,6 +48,11 @@ describe MCPCompose::ServerBuilder do
   end
 
   def a_valid_config(with: {})
-    {}.merge(with)
+    {name: "test"}.merge(with)
+  end
+
+  def list_server_tools(server)
+    response = server.handle({jsonrpc: "2.0", method: "tools/list", id: 1})
+    response[:result][:tools]
   end
 end

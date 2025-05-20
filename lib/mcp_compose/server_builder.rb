@@ -10,7 +10,16 @@ module MCPCompose
     end
 
     def build
-      ModelContextProtocol::Server.new(name: @config[:name])
+      clients = {}
+      (@config[:servers] || {}).each do |name, config|
+        clients[name] = @client_builder.build(config)
+      end
+
+      server = ModelContextProtocol::Server.new(name: @config[:name])
+      server.tools_list_handler do |request|
+        clients.values.map(&:list_tools).flatten
+      end
+      server
     end
   end
 end
