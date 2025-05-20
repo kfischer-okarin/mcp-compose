@@ -4,8 +4,9 @@ require "model_context_protocol"
 
 module MCPCompose
   class ServerBuilder
-    def initialize(config:)
+    def initialize(config:, client_builder:)
       @config = config
+      @client_builder = client_builder
     end
 
     def build
