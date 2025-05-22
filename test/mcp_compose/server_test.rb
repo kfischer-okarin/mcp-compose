@@ -6,7 +6,7 @@ require_relative "../../lib/mcp_compose/server"
 
 module MCPCompose
   describe Server do
-    specify "the server has the specified name" do
+    specify "specifying the server name" do
       server = build_server(with_config_containing: {
         name: "test"
       })
