@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 # MCP Server library
 # Official Ruby SDK but no official release yet so use git commit
-gem "model_context_protocol", git: "https://github.com/modelcontextprotocol/ruby-sdk.git", ref: "784b8b85481098c15887189ed8e8cfb4c5a67852"
+gem "model_context_protocol", git: "https://github.com/modelcontextprotocol/ruby-sdk.git", ref: "18f3e8761e75febafcebe1849c3d60fa4fdffce2"
 
 group :development, :test do
   # Testing Framework
