@@ -7,8 +7,9 @@ require_relative "../../lib/mcp_compose/server"
 module MCPCompose
   describe Server do
     specify "the server has the specified name" do
-      config = a_valid_config(with: {name: "test"})
-      server = build_server(config: config)
+      server = build_server(with_config_containing: {
+        name: "test"
+      })
 
       initialize_response = server.handle_request initialize_request
 
@@ -17,12 +18,13 @@ module MCPCompose
 
     private
 
-    def a_valid_config(with: {})
-      {}.merge(with)
+    def build_server(with_config_containing: {})
+      config = a_valid_config.merge(with_config_containing)
+      MCPCompose::Server.new(config: config)
     end
 
-    def build_server(config: a_valid_config)
-      MCPCompose::Server.new(config: config)
+    def a_valid_config
+      {name: "test"}
     end
 
     def initialize_request
