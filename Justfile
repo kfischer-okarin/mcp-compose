@@ -1,8 +1,8 @@
 install:
     bundle install
 
-run:
-    bundle exec ruby main.rb
+format:
+    ./bin/rake format
 
-format-code +files="":
-    bundle exec standardrb --fix {{files}}
+test:
+    ./bin/rake
