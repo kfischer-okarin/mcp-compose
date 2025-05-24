@@ -24,9 +24,10 @@ module MCPCompose
 
     it "returns a nice error message if the mcp-compose.yml file is not found" do
       in_temp_dir do
-        assert_raises(CLI::Error, /mcp-compose.yml not found/) do
+        exception = assert_raises(CLI::Error) do
           cli.run
         end
+        value(exception.message).must_include("mcp-compose.yml not found")
       end
     end
 
