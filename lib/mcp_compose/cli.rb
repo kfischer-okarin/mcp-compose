@@ -4,15 +4,15 @@ require "yaml"
 
 module MCPCompose
   # Handles command line arguments and configuration and passes the resulting
-  # config to the build_server_function
+  # config to the run_server_function
   class CLI
-    def initialize(build_server_function:)
-      @build_server_function = build_server_function
+    def initialize(run_server_function:)
+      @run_server_function = run_server_function
     end
 
     def run
       config = YAML.load_file("mcp-compose.yml", symbolize_names: true)
-      @build_server_function.call(config)
+      @run_server_function.call(config)
     end
   end
 end
