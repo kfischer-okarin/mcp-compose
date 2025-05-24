@@ -14,8 +14,8 @@ module MCPCompose
 
       errors = schema_validator.validate(result).to_a
       if errors.any?
-        messages = errors.map { |error| error["error"] }
-        raise Error, "invalid configuration: #{messages.join(", ")}"
+        messages = errors.map { |error| "- #{error['error']}" }
+        raise Error, "invalid configuration:\n#{messages.join("\n")}"
       end
 
       result
