@@ -1,0 +1,34 @@
+# frozen_string_literal: true
+
+require_relative "lib/mcp_compose/version"
+
+Gem::Specification.new do |spec|
+  spec.name = "mcp_compose"
+  spec.version = MCPCompose::VERSION
+  spec.authors = ["Kevin Fischer"]
+  spec.email = ["kfischer_okarin@yahoo.co.jp"]
+
+  spec.summary = "MCP Server composition tool"
+  spec.description = "A tool for composing MCP servers"
+  spec.homepage = "https://github.com/kfischer-okarin/mcp-compose"
+  spec.license = "MIT"
+  spec.required_ruby_version = ">= 3.2.0"
+
+  spec.metadata["source_code_uri"] = "https://github.com/kfischer-okarin/mcp-compose"
+  spec.metadata["changelog_uri"] = "https://github.com/kfischer-okarin/mcp-compose/blob/main/CHANGELOG.md"
+
+  spec.files = Dir["lib/**/*.rb"] + ["README.md", "LICENSE"]
+  spec.require_paths = ["lib"]
+
+  # MCP Server library
+  spec.add_dependency "model_context_protocol", "~> 0.7.0"
+
+  # Testing Framework
+  spec.add_development_dependency "minitest", "~> 5.25"
+  # Nice test outputs
+  spec.add_development_dependency "minitest-reporters", "~> 1.7"
+  # Task runner
+  spec.add_development_dependency "rake", "~> 13.2"
+  # Code formatting
+  spec.add_development_dependency "standard", "~> 1.50"
+end

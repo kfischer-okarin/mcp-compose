@@ -6,6 +6,12 @@ GIT
     model_context_protocol (0.7.0)
       json_rpc_handler (~> 0.1)
 
+PATH
+  remote: .
+  specs:
+    mcp_compose (0.1.0)
+      model_context_protocol (~> 0.7.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -71,11 +77,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  minitest
-  minitest-reporters
-  model_context_protocol!
-  rake
-  standard
+  mcp_compose!
+  minitest (~> 5.25)
+  minitest-reporters (~> 1.7)
+  model_context_protocol (~> 0.7.0)!
+  rake (~> 13.2)
+  standard (~> 1.50)
 
 BUNDLED WITH
    2.6.3
