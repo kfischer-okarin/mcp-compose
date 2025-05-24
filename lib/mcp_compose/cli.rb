@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "yaml"
+require_relative "config_parser"
 
 module MCPCompose
   # Handles command line arguments and configuration and passes the resulting
@@ -13,7 +13,7 @@ module MCPCompose
     end
 
     def run
-      config = YAML.load_file("mcp-compose.yml", symbolize_names: true)
+      config = ConfigParser.new(File.read("mcp-compose.yml")).parsed_config
       @run_server_function.call(config)
     rescue Errno::ENOENT
       raise Error, "mcp-compose.yml not found"
