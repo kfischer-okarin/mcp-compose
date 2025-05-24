@@ -13,7 +13,7 @@ module MCPCompose
     end
 
     def run
-      config = ConfigParser.new(File.read("mcp-compose.yml")).parsed_config
+      config = ConfigParser.new.parse(File.read("mcp-compose.yml"))
       @run_server_function.call(config)
     rescue Errno::ENOENT
       raise Error, "mcp-compose.yml not found"

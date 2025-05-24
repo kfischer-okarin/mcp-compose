@@ -11,7 +11,7 @@ module MCPCompose
         name: test
       YAML
 
-      result = ConfigParser.new(content).parsed_config
+      result = ConfigParser.new.parse(content)
 
       value(result).must_equal({name: "test"})
     end
