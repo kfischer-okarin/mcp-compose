@@ -16,6 +16,18 @@ module MCPCompose
       value(result).must_equal({name: "test"})
     end
 
+    it "shows an explicit error if the configuration is not valid YAML" do
+      content = <<~YAML
+        name: test
+        notyamlanymore
+      YAML
+
+      exception = assert_raises(ConfigParser::Error) do
+        ConfigParser.new.parse(content)
+      end
+      value(exception.message).must_include("invalid YAML")
+    end
+
     it "shows an explicit error message if the configuration is invalid" do
       content = <<~YAML
         name:

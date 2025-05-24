@@ -11,7 +11,11 @@ module MCPCompose
     class Error < StandardError; end
 
     def parse(content)
-      result = YAML.load(content, symbolize_names: true)
+      begin
+        result = YAML.load(content, symbolize_names: true)
+      rescue Psych::SyntaxError => e
+        raise Error, "invalid configuration: invalid YAML\n#{e.message}"
+      end
 
       errors = schema_validator.validate(result).to_a
       if errors.any?
