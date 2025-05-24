@@ -17,7 +17,9 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/kfischer-okarin/mcp-compose"
   spec.metadata["changelog_uri"] = "https://github.com/kfischer-okarin/mcp-compose/blob/main/CHANGELOG.md"
 
-  spec.files = Dir["lib/**/*.rb"] + ["README.md", "LICENSE"]
+  spec.files = Dir["lib/**/*.rb"] + Dir["exe/*"] + ["README.md", "LICENSE"]
+  spec.bindir = "exe"
+  spec.executables = ["mcp-compose"]
   spec.require_paths = ["lib"]
 
   # MCP Server library

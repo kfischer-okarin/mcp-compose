@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "mcp_compose"
+
+run_server = ->(config) do
+  MCPCompose::Server.new(config: config).run
+end
+
+cli = MCPCompose::CLI.new(run_server_function: run_server)
+
+begin
+  cli.run
+rescue MCPCompose::CLI::Error => e
+  warn e.message
+  exit 1
+end
