@@ -24,6 +24,8 @@ Gem::Specification.new do |spec|
 
   # MCP Server library
   spec.add_dependency "model_context_protocol", "~> 0.7.0"
+  # JSON Schema validator
+  spec.add_dependency "json_schemer", "~> 2.4"
 
   # Testing Framework
   spec.add_development_dependency "minitest", "~> 5.25"
