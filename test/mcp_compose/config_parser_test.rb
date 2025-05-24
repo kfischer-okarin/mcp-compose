@@ -15,5 +15,18 @@ module MCPCompose
 
       value(result).must_equal({name: "test"})
     end
+
+    it "shows an explicit error message if the configuration is invalid" do
+      content = <<~YAML
+        name:
+          invalid_child: invalid_value
+      YAML
+
+      exception = assert_raises(ConfigParser::Error) do
+        ConfigParser.new.parse(content)
+      end
+      value(exception.message).must_include("value at `/name` is not a string")
+      value(exception.message).wont_include("$schema", "It should not show the whole error hash")
+    end
   end
 end
