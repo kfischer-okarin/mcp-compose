@@ -7,6 +7,7 @@ require "json_schemer"
 module MCPCompose
   class ConfigParser
     SCHEMA_PATH = File.expand_path("../../schema/v1/mcp-compose.schema.json", __dir__)
+
     class Error < StandardError; end
 
     def parse(content)
@@ -14,7 +15,7 @@ module MCPCompose
 
       errors = schema_validator.validate(result).to_a
       if errors.any?
-        messages = errors.map { |error| "- #{error['error']}" }
+        messages = errors.map { |error| "- #{error["error"]}" }
         raise Error, "invalid configuration:\n#{messages.join("\n")}"
       end
 
