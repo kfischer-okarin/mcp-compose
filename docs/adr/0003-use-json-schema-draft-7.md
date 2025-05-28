@@ -21,6 +21,10 @@ question of which version to use.
 
 I will use **JSON Schema Draft 7**.
 
+## Alternatives Considered
+
+- Using the latest version of JSON Schema (2020-12)
+
 ## Consequences
 
 - 👍🏻 Easy to get editor integration

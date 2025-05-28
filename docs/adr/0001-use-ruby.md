@@ -21,6 +21,11 @@ A language for the project needs to be chosen.
 
 I will use **Ruby**.
 
+## Alternatives Considered
+
+- Python
+- TypeScript
+
 ## Consequences
 
 - 👍 Development will be more fun for me.

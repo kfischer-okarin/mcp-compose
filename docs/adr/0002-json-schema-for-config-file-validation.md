@@ -21,6 +21,11 @@ The `mcp-compose.yml` will have a fixed YAML format that should be validated
 I will use **JSON Schema** to validate the config file and limit myself to
 simple YAML features that will cleanly reduce to JSON.
 
+## Alternatives Considered
+
+- Handwritten validation logic
+- Using a Object Mapper library like `dry-types` or `shale`
+
 ## Consequences
 
 - 👍🏻 I can delegate the validation to existing validation libraries
