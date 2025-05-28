@@ -13,12 +13,15 @@ status: accepted
 Having chosen JSON Schema for config file validation, there still remains the
 question of which version to use.
 
+- VS Code has good support for Draft 7
+- The `json_schemer` gem supports Draft 7
+- I don't really think I'll need any of the more recent features.
+
 ## Decision
 
-I will use JSON Schema Draft 7 since that's best supported in VS Code and I
-don't really think I'll need any of the more recent features.
+I will use **JSON Schema Draft 7**.
 
 ## Consequences
 
-- 👍🏻 Best supported in VS Code.
+- 👍🏻 Easy to get editor integration
 - 👎🏻 Recent features of JSON Schema are not available.

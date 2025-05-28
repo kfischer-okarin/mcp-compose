@@ -10,14 +10,16 @@ status: accepted
 
 ## Context
 
-Obviously a programming language must be chosen before starting to make the
-tool. Most of the popular MCP libraries or servers seem to be written in Python
-or TypeScript. But this is a personal side project and Ruby is my favorite
-language.
+A language for the project needs to be chosen.
+
+- This is a solo hobby project (for now)
+- I am the main target user
+- Ruby is my favorite language
+- Most of the MCP ecosystem is written in Python or TypeScript
 
 ## Decision
 
-I will use Ruby.
+I will use **Ruby**.
 
 ## Consequences
 
@@ -25,3 +27,4 @@ I will use Ruby.
 - 👎🏻 Tooling and libraries are not as mature as for Python or TypeScript.
 - 👎🏻 Common best practices or patterns for MCP Server development in Ruby are
   not yet established. So I will have to come up with my own.
+  - But this is also a fun opportunity to come up with some.
