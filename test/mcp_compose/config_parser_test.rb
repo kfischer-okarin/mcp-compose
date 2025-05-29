@@ -11,7 +11,7 @@ module MCPCompose
 
       result = ConfigParser.new.parse(example_config_content)
 
-      expected = {name: "My Tools"}
+      expected = {name: "My Tools", servers: {hello_mcp: {transport: {type: "stdio"}}}}
       value(result).must_equal(expected)
     end
 

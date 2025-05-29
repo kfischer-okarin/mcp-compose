@@ -1,1 +1,6 @@
 name: My Tools
+
+servers:
+  hello_mcp:
+    transport:
+      type: stdio

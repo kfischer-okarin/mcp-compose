@@ -8,8 +8,57 @@
     "name": {
       "type": "string",
       "description": "The name of the server"
+    },
+    "servers": {
+      "type": "object",
+      "description": "The servers to run",
+      "additionalProperties": {
+        "$ref": "#/definitions/ServerConfig"
+      }
     }
   },
-  "required": ["name"],
-  "additionalProperties": false
+  "required": ["name", "servers"],
+  "additionalProperties": false,
+  "definitions": {
+    "ServerConfig": {
+      "type": "object",
+      "properties": {
+        "transport": {
+          "$ref": "#/definitions/TransportConfig"
+        }
+      }
+    },
+    "StdioTransportConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "stdio"
+        }
+      }
+    },
+    "TransportConfig": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "$ref": "#/definitions/TransportType"
+            }
+          }
+        },
+        {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/StdioTransportConfig"
+            }
+          ]
+        }
+      ]
+    },
+    "TransportType": {
+      "type": "string",
+      "description": "The type of transport to use",
+      "enum": ["stdio"]
+    }
+  }
 }
