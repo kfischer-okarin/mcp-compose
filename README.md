@@ -15,6 +15,13 @@ mcp-compose
 
 ## Example `mcp-compose.yml`
 
+<!-- examples/mcp-compose.yml begin -->
 ```yaml
 name: My Tools
+
+servers:
+  hello_mcp:
+    transport:
+      type: stdio
 ```
+<!-- examples/mcp-compose.yml end -->
