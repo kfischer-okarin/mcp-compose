@@ -7,7 +7,7 @@ run_server = ->(config) do
   MCPCompose::Server.new(config: config).run
 end
 
-cli = MCPCompose::CLI.new(run_server_function: run_server)
+cli = MCPCompose::CLI.new(run_server_function: run_server, config_parser: MCPCompose::ConfigParser.new)
 
 begin
   cli.run

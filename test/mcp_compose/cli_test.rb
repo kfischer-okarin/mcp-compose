@@ -7,15 +7,18 @@ require_relative "../../lib/mcp_compose/cli"
 module MCPCompose
   describe CLI do
     let(:run_server_function) { Minitest::Mock.new }
-    let(:cli) { CLI.new(run_server_function: run_server_function) }
+    let(:config_parser) { Minitest::Mock.new }
+    let(:cli) { CLI.new(run_server_function: run_server_function, config_parser: config_parser) }
 
     it "reads the mcp-compose.yml file in the current directory" do
       in_temp_dir do
-        File.write("mcp-compose.yml", <<~YAML)
-          name: test
+        mcp_compose_content = <<~YAML
+          some: config
         YAML
+        File.write("mcp-compose.yml", mcp_compose_content)
 
-        run_server_function.expect(:call, nil, [{name: "test"}])
+        config_parser.expect(:parse, :parse_result, [mcp_compose_content])
+        run_server_function.expect(:call, nil, [:parse_result])
         cli.run
 
         value(run_server_function).must_verify
