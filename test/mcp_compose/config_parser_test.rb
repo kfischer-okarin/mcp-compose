@@ -6,14 +6,13 @@ require_relative "../../lib/mcp_compose/config_parser"
 
 module MCPCompose
   describe ConfigParser do
-    it "parses a valid configuration" do
-      content = <<~YAML
-        name: test
-      YAML
+    it "parses a valid configuration (examples/mcp-compose.yml)" do
+      example_config_content = File.read(File.expand_path("../../examples/mcp-compose.yml", __dir__))
 
-      result = ConfigParser.new.parse(content)
+      result = ConfigParser.new.parse(example_config_content)
 
-      value(result).must_equal({name: "test"})
+      expected = {name: "My Tools"}
+      value(result).must_equal(expected)
     end
 
     it "shows an explicit error if the configuration is not valid YAML" do
