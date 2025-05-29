@@ -18,6 +18,8 @@ module MCPCompose
       @run_server_function.call(config)
     rescue Errno::ENOENT
       raise Error, "mcp-compose.yml not found"
+    rescue MCPCompose::ConfigParser::Error => e
+      raise Error, e.message
     end
   end
 end

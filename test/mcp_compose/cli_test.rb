@@ -34,12 +34,32 @@ module MCPCompose
       end
     end
 
+    it "returns a nice error message if the mcp-compose.yml file is invalid" do
+      in_temp_dir do
+        create_a_mcp_compose_file
+        config_parser.expect(:parse, nil) do |_content|
+          raise MCPCompose::ConfigParser::Error, "invalid configuration"
+        end
+
+        exception = assert_raises(CLI::Error) do
+          cli.run
+        end
+        value(exception.message).must_include("invalid configuration")
+      end
+    end
+
     private
 
     def in_temp_dir(&block)
       Dir.mktmpdir do |dir|
         Dir.chdir(dir, &block)
       end
+    end
+
+    def create_a_mcp_compose_file
+      File.write("mcp-compose.yml", <<~YAML)
+        some: config
+      YAML
     end
   end
 end
