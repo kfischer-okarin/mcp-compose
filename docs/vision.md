@@ -53,8 +53,10 @@ loop tighter and more immediate.
 - Custom additional instructions for tools
 - Adding/Overriding tool annotations
 - Overriding tool descriptions
-- Post-tool execution hooks (what kind of format? Ruby scripts?) like
-  automatically run formatter after edit tool
+- Tool wrappers (what kind of format? Ruby scripts?)
+  - Run formatter after edit tools
+  - Auto cancel certain types of tool calls with an error message - i.e.
+    light-weight rule based guardrails
 - Enable adding a reason meta argument to all tools (similar to the think tool
   proposed by Anthropic)
 - Namespacing of tools, resources and prompts to avoid name conflicts
