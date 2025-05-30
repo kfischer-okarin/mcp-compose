@@ -9,7 +9,7 @@ module MCPCompose
     it "parses a valid configuration (examples/mcp-compose.yml)" do
       example_config_content = File.read(File.expand_path("../../examples/mcp-compose.yml", __dir__))
 
-      result = ConfigParser.new.parse(example_config_content)
+      result = build_parser.parse(example_config_content)
 
       expected = {name: "My Tools", servers: {hello_mcp: {transport: {type: "stdio"}}}}
       value(result).must_equal(expected)
@@ -22,7 +22,7 @@ module MCPCompose
       YAML
 
       exception = assert_raises(ConfigParser::Error) do
-        ConfigParser.new.parse(content)
+        build_parser.parse(content)
       end
       value(exception.message).must_include("invalid YAML")
     end
@@ -34,10 +34,16 @@ module MCPCompose
       YAML
 
       exception = assert_raises(ConfigParser::Error) do
-        ConfigParser.new.parse(content)
+        build_parser.parse(content)
       end
       value(exception.message).must_include("value at `/name` is not a string")
       value(exception.message).wont_include("$schema", "It should not show the whole error hash")
+    end
+
+    private
+
+    def build_parser(cwd: "/test/dir")
+      ConfigParser.new(cwd:)
     end
   end
 end

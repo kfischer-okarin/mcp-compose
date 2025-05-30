@@ -10,6 +10,10 @@ module MCPCompose
 
     class Error < StandardError; end
 
+    def initialize(cwd:)
+      @cwd = cwd
+    end
+
     def parse(content)
       begin
         result = YAML.load(content, symbolize_names: true)
