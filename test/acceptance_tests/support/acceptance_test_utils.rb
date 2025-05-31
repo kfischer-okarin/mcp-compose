@@ -22,4 +22,10 @@ module AcceptanceTestUtils
     end
     skip(message)
   end
+
+  def respond_to_missing?(name, include_private = false)
+    # We never throw a NoMethodError because method_missing will always skip the test instead but that doesn't mean
+    # that the object is really responding to the method. So we just use the default implementation.
+    super
+  end
 end
