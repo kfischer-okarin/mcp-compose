@@ -5,8 +5,6 @@ require "stringio"
 
 require_relative "../test_helper"
 
-require_relative "../../lib/mcp_compose/io_client"
-
 module MCPCompose
   describe IOClient do
     let(:connected_io_pair) { Socket.pair(:UNIX, :STREAM, 0) }

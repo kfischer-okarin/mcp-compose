@@ -2,8 +2,6 @@
 
 require_relative "../test_helper"
 
-require_relative "../../lib/mcp_compose/server"
-
 module MCPCompose
   describe Server do
     specify "specifying the server name" do

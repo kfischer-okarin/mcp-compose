@@ -2,8 +2,6 @@
 
 require_relative "../test_helper"
 
-require_relative "../../lib/mcp_compose/config_parser"
-
 module MCPCompose
   describe ConfigParser do
     it "parses a valid configuration (examples/mcp-compose.yml)" do

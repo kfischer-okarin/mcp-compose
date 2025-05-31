@@ -2,8 +2,6 @@
 
 require_relative "../test_helper"
 
-require_relative "../../lib/mcp_compose/cli"
-
 module MCPCompose
   describe CLI do
     let(:run_server_function) { Minitest::Mock.new }
