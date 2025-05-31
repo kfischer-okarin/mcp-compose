@@ -8,8 +8,11 @@ require_relative "../../lib/mcp_compose/io_client"
 
 module MCPCompose
   describe IOClient do
+    let(:connected_io_pair) { Socket.pair(:UNIX, :STREAM, 0) }
+    let(:client_side_io) { connected_io_pair[0] }
+    let(:server_side_io) { connected_io_pair[1] }
+
     it "sends a initialization request and notification to the server when connecting" do
-      server_side_io, client_side_io = Socket.pair(:UNIX, :STREAM, 0)
       client = IOClient.new(client_side_io)
 
       connect_thread = Thread.new do
