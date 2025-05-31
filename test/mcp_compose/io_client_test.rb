@@ -77,6 +77,31 @@ module MCPCompose
       value(log_content_lines[2]).must_equal ">> {\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}"
     end
 
+    it "can retrieve the tools list" do
+      client = IOClient.new(client_side_io)
+
+      thread = Thread.new do
+        client.list_tools
+      end
+
+      message = next_client_message
+      value(message.except(:id)).must_equal({
+        jsonrpc: "2.0",
+        method: "tools/list"
+      })
+
+      send_to_client_as_json({
+        jsonrpc: "2.0",
+        id: message[:id],
+        result: {
+          tools: ["one", "two", "three"]
+        }
+      })
+
+      tools = thread.value
+      value(tools).must_equal(["one", "two", "three"])
+    end
+
     private
 
     def next_client_message

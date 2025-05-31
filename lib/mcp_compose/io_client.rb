@@ -29,6 +29,13 @@ module MCPCompose
       send_json_rpc_notification(method: "notifications/initialized")
     end
 
+    # Returns the list of tools available on the server
+    # Returns only the json[:result][:tools] part of the response
+    def list_tools
+      response = send_json_rpc_request(method: "tools/list")
+      response[:result][:tools]
+    end
+
     private
 
     def send_json_rpc_request(method:, params: nil)
@@ -37,7 +44,7 @@ module MCPCompose
         method: method,
         params: params,
         id: @next_id
-      }
+      }.compact
       @next_id += 1
       send_via_io(request.to_json)
       JSON.parse(receive_from_io, symbolize_names: true)
