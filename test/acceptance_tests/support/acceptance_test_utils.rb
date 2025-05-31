@@ -2,6 +2,8 @@
 
 require "pathname"
 
+require_relative "../../../lib/mcp_compose/io_client"
+
 # This module contains private utility methods for acceptance tests which are
 # not listed among the available DSL methods.
 module AcceptanceTestUtils
@@ -30,6 +32,20 @@ module AcceptanceTestUtils
 
   def ensure_base_dir_is_prepared
     @base_dir ||= Pathname.new(Dir.mktmpdir("mcp-compose-acceptance-tests"))
+  end
+
+  def client
+    unless @client
+      ensure_base_dir_is_prepared
+
+      mcp_compose_absolute_path = AcceptanceTestUtils.project_root_dir / "exe" / "mcp-compose"
+      stream = IO.popen([mcp_compose_absolute_path.to_s], "r+", chdir: @base_dir)
+
+      @client = MCPCompose::IOClient.new(stream, log_io: AcceptanceTestUtils.log_file)
+      @client.connect
+    end
+
+    @client
   end
 
   def method_missing(name, *args, &block)

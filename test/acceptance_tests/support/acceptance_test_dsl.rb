@@ -18,6 +18,10 @@ module AcceptanceTestDSL
     File.write(@base_dir / "mcp-compose.yml", content)
   end
 
+  def list_tools
+    client.list_tools
+  end
+
   class MCPServerDSL
     def initialize(name:, base_dir:)
       @name = name
