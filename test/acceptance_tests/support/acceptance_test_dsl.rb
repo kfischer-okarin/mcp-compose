@@ -12,6 +12,12 @@ module AcceptanceTestDSL
     mcp_server_dsl.build
   end
 
+  def given_a_mcp_compose_file(content)
+    ensure_base_dir_is_prepared
+
+    File.write(@base_dir / "mcp-compose.yml", content)
+  end
+
   class MCPServerDSL
     def initialize(name:, base_dir:)
       @name = name
