@@ -5,11 +5,15 @@ require "json"
 module MCPCompose
   # A simple MCP client communicating via a single bidirectional IO object
   class IOClient
-    def initialize(io)
+    # @param io [IO] The IO object to use for communication
+    # @param log_io [IO] The IO object to use for logging (optional)
+    def initialize(io, log_io: nil)
       @io = io
+      @log_io = log_io
       @next_id = 1
     end
 
+    # Connects to the server by doing the initial MCP initialize exchange
     def connect
       send_json_rpc_request(
         method: "initialize",
@@ -49,11 +53,14 @@ module MCPCompose
     end
 
     def send_via_io(message)
+      @log_io.puts(">> #{message}") if @log_io
       @io.puts(message)
     end
 
     def receive_from_io
-      @io.gets
+      message = @io.gets
+      @log_io.puts("<< #{message}") if @log_io
+      message
     end
   end
 end
