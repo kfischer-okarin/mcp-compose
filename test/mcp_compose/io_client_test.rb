@@ -20,7 +20,7 @@ module MCPCompose
         client.connect
       end
 
-      first_message = JSON.parse(server_side_io.gets, symbolize_names: true)
+      first_message = next_client_message
       value(first_message.except(:id)).must_equal({
         jsonrpc: "2.0",
         method: "initialize",
@@ -47,10 +47,10 @@ module MCPCompose
           }
         }
       }
-      server_side_io.puts(response.to_json)
+      send_to_client_as_json(response)
       value(connect_thread).must_be :alive?
 
-      second_message = JSON.parse(server_side_io.gets, symbolize_names: true)
+      second_message = next_client_message
       value(second_message).must_equal({
         jsonrpc: "2.0",
         method: "notifications/initialized"
@@ -66,15 +66,25 @@ module MCPCompose
         client.connect
       end
 
-      server_side_io.gets
-      server_side_io.puts('"some response"')
-      server_side_io.gets
+      next_client_message
+      send_to_client_as_json("some response")
+      next_client_message
       connect_thread.join
 
       log_content_lines = log_io.string.split("\n")
       value(log_content_lines[0]).must_include ">> {\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":"
       value(log_content_lines[1]).must_equal "<< \"some response\""
       value(log_content_lines[2]).must_equal ">> {\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}"
+    end
+
+    private
+
+    def next_client_message
+      JSON.parse(server_side_io.gets, symbolize_names: true)
+    end
+
+    def send_to_client_as_json(value)
+      server_side_io.puts(value.to_json)
     end
   end
 end
