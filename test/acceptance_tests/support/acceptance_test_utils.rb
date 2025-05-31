@@ -5,6 +5,27 @@ require "pathname"
 # This module contains private utility methods for acceptance tests which are
 # not listed among the available DSL methods.
 module AcceptanceTestUtils
+  class << self
+    def log_file
+      @log_file ||= File.open(local_tmp_dir / "mcp-compose-acceptance-tests.log", "w")
+    end
+
+    def local_tmp_dir
+      (project_root_dir / "tmp").tap(&:mkpath)
+    end
+
+    def project_root_dir
+      current = Pathname.new(__dir__)
+      current = current.parent until (current / "Gemfile").exist?
+      current
+    end
+  end
+
+  def before_setup
+    AcceptanceTestUtils.log_file.puts
+    AcceptanceTestUtils.log_file.puts("=== #{self.class.name} - #{name} ===")
+  end
+
   private
 
   def ensure_base_dir_is_prepared
