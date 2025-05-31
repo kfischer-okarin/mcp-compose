@@ -5,15 +5,25 @@ require "yaml"
 require "json_schemer"
 
 module MCPCompose
+  # Handles parsing and validation of the mcp-compose.yml file
   class ConfigParser
     SCHEMA_PATH = File.expand_path("../../schema/v1/mcp-compose.schema.json", __dir__)
 
     class Error < StandardError; end
 
+    # @param cwd [String] the current working directory, used to resolve relative paths in the configuration
     def initialize(cwd:)
       @cwd = cwd
     end
 
+    # Parses and validates the given YAML content as mcp-compose configuration.
+    #
+    # The resulting configuration will be normalized, i.e. it will explicitly contain the default values for all
+    # optional fields.
+    #
+    # @param content [String] the content of the mcp-compose.yml file
+    # @returns [Hash] the parsed, normalized configuration
+    # @raises [Error] if the configuration is invalid
     def parse(content)
       begin
         result = YAML.load(content, symbolize_names: true)
