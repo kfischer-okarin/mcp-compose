@@ -6,14 +6,15 @@ module MCPCompose
   class CLI
     class Error < StandardError; end
 
-    def initialize(run_server_function:, config_parser:)
-      @run_server_function = run_server_function
+    def initialize(server_builder:, config_parser:)
+      @server_builder = server_builder
       @config_parser = config_parser
     end
 
     def run
       config = @config_parser.parse(File.read("mcp-compose.yml"))
-      @run_server_function.call(config)
+      server = @server_builder.build(config)
+      server.run
     rescue Errno::ENOENT
       raise Error, "mcp-compose.yml not found"
     rescue MCPCompose::ConfigParser::Error => e

@@ -3,12 +3,9 @@
 
 require "mcp_compose"
 
-run_server = ->(config) do
-  MCPCompose::Server.new(config: config).run
-end
-
+server_builder = MCPCompose::ServerBuilder.new
 config_parser = MCPCompose::ConfigParser.new(cwd: Dir.pwd)
-cli = MCPCompose::CLI.new(run_server_function: run_server, config_parser: config_parser)
+cli = MCPCompose::CLI.new(server_builder: server_builder, config_parser: config_parser)
 
 begin
   cli.run
