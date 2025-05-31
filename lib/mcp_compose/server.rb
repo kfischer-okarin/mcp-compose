@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require "model_context_protocol"
-require "model_context_protocol/transports/stdio"
+require "mcp"
+require "mcp/transports/stdio"
 
 module MCPCompose
   class Server
     def initialize(config:)
       @config = config
-      @wrapped_server = ModelContextProtocol::Server.new(name: config[:name])
+      @wrapped_server = MCP::Server.new(name: config[:name])
     end
 
     def handle_request(request)
@@ -15,7 +15,7 @@ module MCPCompose
     end
 
     def run
-      ModelContextProtocol::Transports::StdioTransport.new(@wrapped_server).open
+      MCP::Transports::StdioTransport.new(@wrapped_server).open
     end
   end
 end

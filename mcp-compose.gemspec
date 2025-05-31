@@ -22,8 +22,8 @@ Gem::Specification.new do |spec|
   spec.executables = ["mcp-compose"]
   spec.require_paths = ["lib"]
 
-  # MCP Server library
-  spec.add_dependency "model_context_protocol", "~> 0.7.0"
+  # Official MCP SDK
+  spec.add_dependency "mcp", "~> 0.1.0"
   # JSON Schema validator
   spec.add_dependency "json_schemer", "~> 2.4"
 
