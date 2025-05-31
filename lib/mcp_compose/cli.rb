@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "config_parser"
-
 module MCPCompose
   # Handles command line arguments and configuration and passes the resulting
   # config to the run_server_function
