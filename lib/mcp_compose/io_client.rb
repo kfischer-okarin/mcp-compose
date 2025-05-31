@@ -35,8 +35,8 @@ module MCPCompose
         id: @next_id
       }
       @next_id += 1
-      @io.puts(request.to_json)
-      JSON.parse(@io.gets, symbolize_names: true)
+      send_via_io(request.to_json)
+      JSON.parse(receive_from_io, symbolize_names: true)
     end
 
     def send_json_rpc_notification(method:, params: nil)
@@ -45,7 +45,15 @@ module MCPCompose
         method: method,
         params: params
       }.compact
-      @io.puts(notification.to_json)
+      send_via_io(notification.to_json)
+    end
+
+    def send_via_io(message)
+      @io.puts(message)
+    end
+
+    def receive_from_io
+      @io.gets
     end
   end
 end
