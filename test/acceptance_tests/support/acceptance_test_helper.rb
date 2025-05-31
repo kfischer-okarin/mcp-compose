@@ -3,6 +3,7 @@
 require_relative "../../test_helper"
 require_relative "acceptance_test_dsl"
 require_relative "acceptance_test_utils"
+require_relative "fixtures"
 
 module Kernel
   # For grouping acceptance test scenarios around a particular feature.
