@@ -11,7 +11,17 @@ module MCPCompose
 
       result = build_parser.parse(example_config_content)
 
-      expected = {name: "My Tools", servers: {hello_mcp: {transport: {type: "stdio"}}}}
+      expected = {
+        name: "My Tools",
+        servers: {
+          hello_mcp: {
+            transport: {
+              type: "stdio",
+              command: "bundle exec main.rb"
+            }
+          }
+        }
+      }
       value(result).must_equal(expected)
     end
 

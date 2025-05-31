@@ -33,8 +33,14 @@
       "properties": {
         "type": {
           "const": "stdio"
+        },
+        "command": {
+          "type": "string",
+          "description": "The command to run to start the server"
         }
-      }
+      },
+      "required": ["type", "command"],
+      "additionalProperties": false
     },
     "TransportConfig": {
       "allOf": [

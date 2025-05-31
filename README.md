@@ -23,5 +23,6 @@ servers:
   hello_mcp:
     transport:
       type: stdio
+      command: bundle exec main.rb
 ```
 <!-- examples/mcp-compose.yml end -->
