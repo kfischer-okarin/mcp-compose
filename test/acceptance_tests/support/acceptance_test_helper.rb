@@ -2,6 +2,7 @@
 
 require_relative "../../test_helper"
 require_relative "acceptance_test_dsl"
+require_relative "acceptance_test_utils"
 
 module Kernel
   # For grouping acceptance test scenarios around a particular feature.
@@ -14,6 +15,7 @@ module Kernel
       end
 
       include AcceptanceTestDSL
+      include AcceptanceTestUtils
 
       instance_eval(&block)
     end
