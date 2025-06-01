@@ -11,9 +11,10 @@ build_server = ->(config) do
 end
 
 cli = MCPCompose::CLI.new(parse_config_function: parse_config, build_server_function: build_server)
+shell_context = MCPCompose::Util::ShellContext.new(cwd: Dir.pwd)
 
 begin
-  cli.run
+  cli.run(shell_context: shell_context)
 rescue MCPCompose::CLI::Error => e
   warn e.message
   exit 1

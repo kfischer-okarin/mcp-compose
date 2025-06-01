@@ -16,11 +16,12 @@ module MCPCompose
       @build_server_function = build_server_function
     end
 
-    def run
-      config = @parse_config_function.call(File.read("mcp-compose.yml"))
+    def run(shell_context:)
+      config_content = shell_context.read_file("mcp-compose.yml")
+      config = @parse_config_function.call(config_content)
       server = @build_server_function.call(config)
       server.run
-    rescue Errno::ENOENT
+    rescue Util::ShellContext::FileNotFoundError
       raise Error, "mcp-compose.yml not found"
     rescue MCPCompose::ConfigParser::Error => e
       raise Error, e.message
