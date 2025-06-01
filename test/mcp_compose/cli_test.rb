@@ -4,9 +4,9 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe CLI do
-    let(:run_server_function) { Minitest::Mock.new }
+    let(:build_server_function) { Minitest::Mock.new }
     let(:config_parser) { Minitest::Mock.new }
-    let(:cli) { CLI.new(run_server_function: run_server_function, config_parser: config_parser) }
+    let(:cli) { CLI.new(build_server_function: build_server_function, config_parser: config_parser) }
 
     it "reads the mcp-compose.yml file in the current directory" do
       in_temp_dir do
@@ -16,10 +16,13 @@ module MCPCompose
         File.write("mcp-compose.yml", mcp_compose_content)
 
         config_parser.expect(:parse, :parse_result, [mcp_compose_content])
-        run_server_function.expect(:call, nil, [:parse_result])
+        server = Minitest::Mock.new
+        build_server_function.expect(:call, server, [:parse_result])
+        server.expect(:run, nil)
         cli.run
 
-        value(run_server_function).must_verify
+        value(build_server_function).must_verify
+        value(server).must_verify
       end
     end
 
