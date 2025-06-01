@@ -3,12 +3,14 @@
 
 require "mcp_compose"
 
+config_parser = MCPCompose::ConfigParser.new(cwd: Dir.pwd)
+parse_config = ->(content) { config_parser.parse(content) }
+
 build_server = ->(config) do
   MCPCompose::Server.new(config: config)
 end
 
-config_parser = MCPCompose::ConfigParser.new(cwd: Dir.pwd)
-cli = MCPCompose::CLI.new(build_server_function: build_server, config_parser: config_parser)
+cli = MCPCompose::CLI.new(parse_config_function: parse_config, build_server_function: build_server)
 
 begin
   cli.run

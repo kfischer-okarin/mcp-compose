@@ -4,9 +4,9 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe CLI do
-    let(:build_server_function) { Minitest::Mock.new }
-    let(:config_parser) { Minitest::Mock.new }
-    let(:cli) { CLI.new(build_server_function: build_server_function, config_parser: config_parser) }
+    let(:parse_config) { Minitest::Mock.new }
+    let(:build_server) { Minitest::Mock.new }
+    let(:cli) { CLI.new(parse_config_function: parse_config, build_server_function: build_server) }
 
     it "reads the mcp-compose.yml file in the current directory" do
       in_temp_dir do
@@ -15,13 +15,14 @@ module MCPCompose
         YAML
         File.write("mcp-compose.yml", mcp_compose_content)
 
-        config_parser.expect(:parse, :parse_result, [mcp_compose_content])
+        parse_config.expect(:call, :parse_result, [mcp_compose_content])
         server = Minitest::Mock.new
-        build_server_function.expect(:call, server, [:parse_result])
+        build_server.expect(:call, server, [:parse_result])
         server.expect(:run, nil)
         cli.run
 
-        value(build_server_function).must_verify
+        value(build_server).must_verify
+        value(parse_config).must_verify
         value(server).must_verify
       end
     end
@@ -38,7 +39,7 @@ module MCPCompose
     it "returns a nice error message if the mcp-compose.yml file is invalid" do
       in_temp_dir do
         create_a_mcp_compose_file
-        config_parser.expect(:parse, nil) do |_content|
+        parse_config.expect(:call, nil) do |_content|
           raise MCPCompose::ConfigParser::Error, "invalid configuration"
         end
 
