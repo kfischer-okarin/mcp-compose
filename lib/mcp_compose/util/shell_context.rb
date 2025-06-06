@@ -23,6 +23,12 @@ module MCPCompose
       rescue Errno::ENOENT
         raise FileNotFoundError
       end
+
+      # @param command [String] the command to spawn
+      # @return [IO] a bidirectional IO object
+      def spawn_process(command)
+        IO.popen(command, "r+", chdir: @cwd.to_s)
+      end
     end
   end
 end

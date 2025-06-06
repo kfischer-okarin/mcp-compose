@@ -33,6 +33,18 @@ module MCPCompose
           shell_context.read_file("non_existent_file.txt")
         end
       end
+
+      it "can spawn a process and return a bidirectional IO object" do
+        command = "cat"
+
+        io = shell_context.spawn_process(command)
+        io.puts "Hello, world!"
+        io.close_write
+        result = io.read
+
+        value(result).must_equal "Hello, world!\n"
+        io.close
+      end
     end
   end
 end
