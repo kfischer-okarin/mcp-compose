@@ -12,7 +12,42 @@ module Kernel
   def feature(desc, &block)
     describe(desc) do
       class << self
-        alias_method :scenario, :it
+        # @param desc [String] The description of the scenario.
+        # @param wip [Boolean] Whether the scenario is a work in progress.
+        #   If true, the scenario will be skipped as long as it fails.
+        #   Once it starts to pass, it will be marked as a failure in the test
+        #   suite, so the developer realizes that the WIP flag can be removed.
+        # @param block [Proc] The test code to be executed.
+        def scenario(desc, wip: false, &block)
+          if wip
+            it(desc) do
+              passed = false
+              error = nil
+
+              begin
+                instance_eval(&block)
+                passed = true
+              rescue Minitest::Assertion, StandardError => e
+                error = e
+              end
+
+              if passed
+                flunk "WIP test passed - remove the wip flag"
+              else
+                # Use Minitest's own error formatting
+                bt = Minitest.filter_backtrace(error.backtrace)
+                  .join("\n    ")
+                  .gsub(%r{#{Dir.pwd}/}, "")
+                skip <<~MESSAGE
+                  WIP: #{error.class}: #{error.message}
+                      #{bt}
+                MESSAGE
+              end
+            end
+          else
+            it(desc, &block)
+          end
+        end
       end
 
       include AcceptanceTestDSL
