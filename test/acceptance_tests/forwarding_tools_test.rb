@@ -1,4 +1,4 @@
-# typed: true
+# frozen_string_literal: true
 
 require_relative "support/acceptance_test_helper"
 
