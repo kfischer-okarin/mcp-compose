@@ -5,8 +5,9 @@ require "mcp/transports/stdio"
 
 module MCPCompose
   class Server
-    def initialize(config:)
+    def initialize(config:, client_builder:)
       @config = config
+      @client_builder = client_builder
       @wrapped_server = MCP::Server.new(name: config[:name])
     end
 

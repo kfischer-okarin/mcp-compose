@@ -5,13 +5,14 @@ require "mcp_compose"
 
 config_parser = MCPCompose::ConfigParser.new(cwd: Dir.pwd)
 parse_config = ->(content) { config_parser.parse(content) }
+shell_context = MCPCompose::Util::ShellContext.new(cwd: Dir.pwd)
+client_builder = MCPCompose::ClientBuilder.new(shell_context: shell_context)
 
 build_server = ->(config) do
-  MCPCompose::Server.new(config: config)
+  MCPCompose::Server.new(config: config, client_builder: client_builder)
 end
 
 cli = MCPCompose::CLI.new(parse_config_function: parse_config, build_server_function: build_server)
-shell_context = MCPCompose::Util::ShellContext.new(cwd: Dir.pwd)
 
 begin
   cli.run(shell_context: shell_context)

@@ -4,6 +4,8 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe Server do
+    let(:client_builder) { Minitest::Mock.new }
+
     specify "specifying the server name" do
       server = build_server(with_config_containing: {
         name: "test"
@@ -18,7 +20,7 @@ module MCPCompose
 
     def build_server(with_config_containing: {})
       config = a_valid_config.merge(with_config_containing)
-      MCPCompose::Server.new(config: config)
+      MCPCompose::Server.new(config: config, client_builder: client_builder)
     end
 
     def a_valid_config
