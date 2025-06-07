@@ -11,7 +11,7 @@ This document contains guidelines for coding in this project.
 
 ```sh
 # Run a specific test
-bundle exec ruby path/to/test.rb
+bundle exec rake test TEST=path/to/test.rb
 ```
 
 ## Unit Test Files
