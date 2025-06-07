@@ -16,6 +16,27 @@ module MCPCompose
       value(initialize_response[:result][:serverInfo][:name]).must_equal "test"
     end
 
+    specify "creates a client for each server in configuration" do
+      mock_client1 = Minitest::Mock.new
+      mock_client2 = Minitest::Mock.new
+
+      server_config1 = {transport: {type: "stdio", command: "server1"}}
+      server_config2 = {transport: {type: "stdio", command: "server2"}}
+
+      client_builder.expect :build, mock_client1, [server_config1]
+      client_builder.expect :build, mock_client2, [server_config2]
+
+      build_server(with_config_containing: {
+        name: "test",
+        servers: {
+          server1: server_config1,
+          server2: server_config2
+        }
+      })
+
+      client_builder.verify
+    end
+
     private
 
     def build_server(with_config_containing: {})

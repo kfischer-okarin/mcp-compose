@@ -9,6 +9,7 @@ module MCPCompose
       @config = config
       @client_builder = client_builder
       @wrapped_server = MCP::Server.new(name: config[:name])
+      @clients = build_clients
     end
 
     def handle_request(request)
@@ -17,6 +18,16 @@ module MCPCompose
 
     def run
       MCP::Transports::StdioTransport.new(@wrapped_server).open
+    end
+
+    private
+
+    def build_clients
+      return {} unless @config[:servers]
+
+      @config[:servers].transform_values { |server_config|
+        @client_builder.build(server_config)
+      }
     end
   end
 end
