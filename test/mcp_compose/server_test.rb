@@ -25,6 +25,8 @@ module MCPCompose
 
       client_builder.expect :build, mock_client1, [server_config1]
       client_builder.expect :build, mock_client2, [server_config2]
+      mock_client1.expect :connect, nil
+      mock_client2.expect :connect, nil
 
       build_server(with_config_containing: {
         name: "test",
@@ -35,6 +37,30 @@ module MCPCompose
       })
 
       client_builder.verify
+    end
+
+    specify "connects to all clients during initialization" do
+      mock_client1 = Minitest::Mock.new
+      mock_client2 = Minitest::Mock.new
+
+      server_config1 = {transport: {type: "stdio", command: "server1"}}
+      server_config2 = {transport: {type: "stdio", command: "server2"}}
+
+      client_builder.expect :build, mock_client1, [server_config1]
+      client_builder.expect :build, mock_client2, [server_config2]
+      mock_client1.expect :connect, nil
+      mock_client2.expect :connect, nil
+
+      build_server(with_config_containing: {
+        name: "test",
+        servers: {
+          server1: server_config1,
+          server2: server_config2
+        }
+      })
+
+      mock_client1.verify
+      mock_client2.verify
     end
 
     private

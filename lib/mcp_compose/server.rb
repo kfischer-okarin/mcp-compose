@@ -10,6 +10,7 @@ module MCPCompose
       @client_builder = client_builder
       @wrapped_server = MCP::Server.new(name: config[:name])
       @clients = build_clients
+      connect_clients
     end
 
     def handle_request(request)
@@ -28,6 +29,13 @@ module MCPCompose
       @config[:servers].transform_values { |server_config|
         @client_builder.build(server_config)
       }
+    end
+
+    def connect_clients
+      threads = @clients.values.map { |client|
+        Thread.new { client.connect }
+      }
+      threads.each(&:join)
     end
   end
 end
