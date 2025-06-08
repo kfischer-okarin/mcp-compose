@@ -60,13 +60,13 @@ module MCPCompose
     end
 
     def send_via_io(message)
-      @log_io.puts(">> #{message}") if @log_io
+      @log_io&.puts(">> #{message}")
       @io.puts(message)
     end
 
     def receive_from_io
       message = @io.gets
-      @log_io.puts("<< #{message}") if @log_io
+      @log_io&.puts("<< #{message}")
       message
     end
   end

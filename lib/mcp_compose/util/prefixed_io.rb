@@ -16,7 +16,7 @@ module MCPCompose
 
       def puts(*args)
         if args.empty?
-          __getobj__.puts("#{@prefix}")
+          __getobj__.puts(@prefix)
         else
           args.each do |arg|
             __getobj__.puts("#{@prefix}#{arg}")
