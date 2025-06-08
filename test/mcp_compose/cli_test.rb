@@ -4,30 +4,28 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe CLI do
-    let(:parse_config) { Minitest::Mock.new }
-    let(:build_server) { Minitest::Mock.new }
-    let(:shell_context) { Minitest::Mock.new }
+    let(:parse_config) { Mock.new }
+    let(:build_server) { Mock.new }
+    let(:shell_context) { Mock.new }
     let(:cli) { CLI.new(parse_config_function: parse_config, build_server_function: build_server) }
 
     it "reads the mcp-compose.yml file in the current directory" do
-      shell_context.expect(:read_file, :mcp_compose_content, ["mcp-compose.yml"])
-      parse_config.expect(:call, :parse_result, [:mcp_compose_content])
-      server = Minitest::Mock.new
-      build_server.expect(:call, server, [:parse_result])
-      server.expect(:run, nil)
+      shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
+      parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
+      server = Mock.new
+      build_server.mock.method(:call).expects_call_with(:parse_result).returns(server)
+      server.mock.method(:run).expects_call
 
       cli.run(shell_context: shell_context)
 
-      value(shell_context).must_verify
-      value(build_server).must_verify
-      value(parse_config).must_verify
-      value(server).must_verify
+      shell_context.mock.assert_expected_calls_received
+      parse_config.mock.assert_expected_calls_received
+      build_server.mock.assert_expected_calls_received
+      server.mock.assert_expected_calls_received
     end
 
     it "returns a nice error message if the mcp-compose.yml file is not found" do
-      shell_context.expect(:read_file, nil) do
-        raise Util::ShellContext::FileNotFoundError
-      end
+      shell_context.mock.method(:read_file).raises(Util::ShellContext::FileNotFoundError)
 
       exception = assert_raises(CLI::Error) do
         cli.run(shell_context: shell_context)
@@ -37,22 +35,13 @@ module MCPCompose
     end
 
     it "returns a nice error message if the mcp-compose.yml file is invalid" do
-      mcp_compose_config_exists
-      parse_config.expect(:call, nil) do |_content|
-        raise MCPCompose::ConfigParser::Error, "invalid configuration"
-      end
+      parse_config.mock.method(:call).raises(MCPCompose::ConfigParser::Error, "invalid configuration")
 
       exception = assert_raises(CLI::Error) do
         cli.run(shell_context: shell_context)
       end
 
       value(exception.message).must_include("invalid configuration")
-    end
-
-    private
-
-    def mcp_compose_config_exists
-      shell_context.expect(:read_file, :mcp_compose_content, ["mcp-compose.yml"])
     end
   end
 end
