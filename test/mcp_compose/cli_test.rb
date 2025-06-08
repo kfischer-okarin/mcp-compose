@@ -16,7 +16,7 @@ module MCPCompose
       build_server.mock.method(:call).expects_call_with(:parse_result).returns(server)
       server.mock.method(:run).expects_call
 
-      cli.run(shell_context: shell_context)
+      cli.run(shell_context: shell_context, args: [])
 
       shell_context.mock.assert_expected_calls_received
       parse_config.mock.assert_expected_calls_received
@@ -28,7 +28,7 @@ module MCPCompose
       shell_context.mock.method(:read_file).raises(Util::ShellContext::FileNotFoundError)
 
       exception = assert_raises(CLI::Error) do
-        cli.run(shell_context: shell_context)
+        cli.run(shell_context: shell_context, args: [])
       end
 
       value(exception.message).must_include("mcp-compose.yml not found")
@@ -38,10 +38,42 @@ module MCPCompose
       parse_config.mock.method(:call).raises(MCPCompose::ConfigParser::Error, "invalid configuration")
 
       exception = assert_raises(CLI::Error) do
-        cli.run(shell_context: shell_context)
+        cli.run(shell_context: shell_context, args: [])
       end
 
       value(exception.message).must_include("invalid configuration")
+    end
+
+    describe "with --log-server-communication flag" do
+      it "passes stderr as log_io to the server when flag is present" do
+        shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
+        parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
+        server = Mock.new
+        build_server.mock.method(:call).expects_call_with(:parse_result, log_io: $stderr).returns(server)
+        server.mock.method(:run).expects_call
+
+        cli.run(shell_context: shell_context, args: ["--log-server-communication"])
+
+        shell_context.mock.assert_expected_calls_received
+        parse_config.mock.assert_expected_calls_received
+        build_server.mock.assert_expected_calls_received
+        server.mock.assert_expected_calls_received
+      end
+
+      it "does not pass log_io when flag is absent" do
+        shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
+        parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
+        server = Mock.new
+        build_server.mock.method(:call).expects_call_with(:parse_result).returns(server)
+        server.mock.method(:run).expects_call
+
+        cli.run(shell_context: shell_context, args: [])
+
+        shell_context.mock.assert_expected_calls_received
+        parse_config.mock.assert_expected_calls_received
+        build_server.mock.assert_expected_calls_received
+        server.mock.assert_expected_calls_received
+      end
     end
   end
 end

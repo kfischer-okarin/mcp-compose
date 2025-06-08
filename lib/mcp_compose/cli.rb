@@ -16,10 +16,18 @@ module MCPCompose
       @build_server_function = build_server_function
     end
 
-    def run(shell_context:)
+    def run(shell_context:, args: [])
+      log_server_communication = args.include?("--log-server-communication")
+
       config_content = shell_context.read_file("mcp-compose.yml")
       config = @parse_config_function.call(config_content)
-      server = @build_server_function.call(config)
+
+      server = if log_server_communication
+        @build_server_function.call(config, log_io: $stderr)
+      else
+        @build_server_function.call(config)
+      end
+
       server.run
     rescue Util::ShellContext::FileNotFoundError
       raise Error, "mcp-compose.yml not found"

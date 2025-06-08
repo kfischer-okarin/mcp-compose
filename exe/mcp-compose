@@ -8,14 +8,14 @@ parse_config = ->(content) { config_parser.parse(content) }
 shell_context = MCPCompose::Util::ShellContext.new(cwd: Dir.pwd)
 client_builder = MCPCompose::ClientBuilder.new(shell_context: shell_context)
 
-build_server = ->(config) do
-  MCPCompose::Server.new(config: config, client_builder: client_builder)
+build_server = ->(config, log_io: nil) do
+  MCPCompose::Server.new(config: config, client_builder: client_builder, log_io: log_io)
 end
 
 cli = MCPCompose::CLI.new(parse_config_function: parse_config, build_server_function: build_server)
 
 begin
-  cli.run(shell_context: shell_context)
+  cli.run(shell_context: shell_context, args: ARGV)
 rescue MCPCompose::CLI::Error => e
   warn e.message
   exit 1
