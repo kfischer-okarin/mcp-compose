@@ -11,7 +11,7 @@ class Mock
     @mock.record_call(method_name, args, kwargs, block)
 
     if @mock.has_stub?(method_name)
-      @mock.execute_stub(method_name)
+      @mock.execute_stub(method_name, args, kwargs)
     else
       self
     end
@@ -28,6 +28,7 @@ class Mock
       @calls = []
       @stubs = {}
       @expectations = []
+      @stub_list = []
     end
 
     def record_call(method_name, args, kwargs, block)
@@ -40,23 +41,35 @@ class Mock
     end
 
     def method(method_name)
-      MethodStub.new(method_name, @stubs, @expectations)
+      MethodStub.new(method_name, @stubs, @expectations, @stub_list)
     end
 
     def has_stub?(method_name)
-      @stubs.key?(method_name)
+      @stubs.key?(method_name) || @stub_list.any? { |stub| stub[:method] == method_name }
     end
 
-    def execute_stub(method_name)
-      stub = @stubs[method_name]
-      case stub[:type]
+    def execute_stub(method_name, args, kwargs)
+      # First, try to find a stub that matches the exact arguments
+      matching_stub = @stub_list.find do |stub|
+        stub[:method] == method_name &&
+          stub[:args_matter] &&
+          stub[:args] == args &&
+          stub[:kwargs] == kwargs
+      end
+
+      # If no exact match found, use the default stub (without args)
+      matching_stub ||= @stubs[method_name]
+
+      return self unless matching_stub
+
+      case matching_stub[:type]
       when :return
-        stub[:value]
+        matching_stub[:value]
       when :raise
-        if stub[:message]
-          raise stub[:exception_class], stub[:message]
+        if matching_stub[:message]
+          raise matching_stub[:exception_class], matching_stub[:message]
         else
-          raise stub[:exception_class]
+          raise matching_stub[:exception_class]
         end
       end
     end
@@ -130,37 +143,68 @@ class Mock
   end
 
   class MethodStub
-    def initialize(method_name, stubs, expectations)
+    def initialize(method_name, stubs, expectations, stub_list)
       @method_name = method_name
       @stubs = stubs
       @expectations = expectations
+      @stub_list = stub_list
+      @current_expectation = nil
     end
 
     def returns(value)
-      @stubs[@method_name] = {type: :return, value: value}
+      if @current_expectation && @current_expectation[:args_matter]
+        # Add to stub_list for argument-specific stubs
+        @stub_list << {
+          method: @method_name,
+          type: :return,
+          value: value,
+          args: @current_expectation[:args],
+          kwargs: @current_expectation[:kwargs],
+          args_matter: true
+        }
+      else
+        # Use default stub for methods without specific arguments
+        @stubs[@method_name] = {type: :return, value: value}
+      end
       self
     end
 
     def raises(exception_class, message = nil)
-      @stubs[@method_name] = {type: :raise, exception_class: exception_class, message: message}
+      if @current_expectation && @current_expectation[:args_matter]
+        # Add to stub_list for argument-specific stubs
+        @stub_list << {
+          method: @method_name,
+          type: :raise,
+          exception_class: exception_class,
+          message: message,
+          args: @current_expectation[:args],
+          kwargs: @current_expectation[:kwargs],
+          args_matter: true
+        }
+      else
+        # Use default stub for methods without specific arguments
+        @stubs[@method_name] = {type: :raise, exception_class: exception_class, message: message}
+      end
       self
     end
 
     def expects_call
-      @expectations << {
+      @current_expectation = {
         method: @method_name,
         args_matter: false
       }
+      @expectations << @current_expectation
       self
     end
 
     def expects_call_with(*args, **kwargs)
-      @expectations << {
+      @current_expectation = {
         method: @method_name,
         args: args,
         kwargs: kwargs,
         args_matter: true
       }
+      @expectations << @current_expectation
       self
     end
   end

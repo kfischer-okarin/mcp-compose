@@ -163,4 +163,51 @@ describe Mock do
       value(mock.mock.calls[0][:args]).must_equal [1, 2]
     end
   end
+
+  describe "when multiple expects_call with returns are defined" do
+    it "returns different values based on arguments" do
+      mock = Mock.new
+
+      mock.mock.method(:greet).expects_call_with("Alice").returns("Hello Alice")
+      mock.mock.method(:greet).expects_call_with("Bob").returns("Hi Bob")
+
+      result1 = mock.greet("Alice")
+      result2 = mock.greet("Bob")
+
+      value(result1).must_equal "Hello Alice"
+      value(result2).must_equal "Hi Bob"
+
+      mock.mock.assert_expected_calls_received
+    end
+
+    it "returns different values for methods with multiple arguments" do
+      mock = Mock.new
+
+      mock.mock.method(:add).expects_call_with(1, 2).returns(3)
+      mock.mock.method(:add).expects_call_with(5, 10).returns(15)
+
+      result1 = mock.add(1, 2)
+      result2 = mock.add(5, 10)
+
+      value(result1).must_equal 3
+      value(result2).must_equal 15
+
+      mock.mock.assert_expected_calls_received
+    end
+
+    it "returns different values for methods with keyword arguments" do
+      mock = Mock.new
+
+      mock.mock.method(:format).expects_call_with(name: "Alice").returns("Name: Alice")
+      mock.mock.method(:format).expects_call_with(name: "Bob", age: 25).returns("Name: Bob, Age: 25")
+
+      result1 = mock.format(name: "Alice")
+      result2 = mock.format(name: "Bob", age: 25)
+
+      value(result1).must_equal "Name: Alice"
+      value(result2).must_equal "Name: Bob, Age: 25"
+
+      mock.mock.assert_expected_calls_received
+    end
+  end
 end
