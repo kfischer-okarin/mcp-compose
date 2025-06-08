@@ -3,26 +3,6 @@
 require_relative "../test_helper"
 
 module MCPCompose
-  class FakeJSONRPCIO
-    attr_reader :received_messages
-
-    def initialize
-      @received_messages = []
-      @last_request_id = nil
-    end
-
-    def puts(message)
-      parsed = JSON.parse(message, symbolize_names: true)
-      @received_messages << parsed
-      @last_request_id = parsed[:id] if parsed[:id]
-      nil
-    end
-
-    def gets
-      {jsonrpc: "2.0", id: @last_request_id, result: {}}.to_json
-    end
-  end
-
   describe ClientBuilder do
     let(:shell_context) { Minitest::Mock.new }
     let(:client_builder) { ClientBuilder.new(shell_context: shell_context) }
@@ -80,6 +60,26 @@ module MCPCompose
       value(fake_io.received_messages.size).must_equal 2
       value(log_io.string).must_include(">> ")
       value(log_io.string).must_include("<< ")
+    end
+  end
+
+  class FakeJSONRPCIO
+    attr_reader :received_messages
+
+    def initialize
+      @received_messages = []
+      @last_request_id = nil
+    end
+
+    def puts(message)
+      parsed = JSON.parse(message, symbolize_names: true)
+      @received_messages << parsed
+      @last_request_id = parsed[:id] if parsed[:id]
+      nil
+    end
+
+    def gets
+      {jsonrpc: "2.0", id: @last_request_id, result: {}}.to_json
     end
   end
 end
