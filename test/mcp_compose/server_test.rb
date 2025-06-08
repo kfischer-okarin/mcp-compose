@@ -63,11 +63,37 @@ module MCPCompose
       mock_client2.verify
     end
 
+    specify "can use log_io to log communication of clients" do
+      log_output = StringIO.new
+      mock_client = Minitest::Mock.new
+      server_config = {transport: {type: "stdio", command: "test-server"}}
+
+      client_builder.expect(:build, mock_client) do |config, log_io:|
+        log_io.puts "test message"
+        value(config).must_equal server_config
+        mock_client
+      end
+      mock_client.expect :connect, nil
+
+      build_server(
+        with_config_containing: {
+          name: "test",
+          servers: {
+            server1: server_config
+          }
+        },
+        log_io: log_output
+      )
+
+      client_builder.verify
+      value(log_output.string).must_include "[server1] test message\n"
+    end
+
     private
 
-    def build_server(with_config_containing: {})
+    def build_server(with_config_containing: {}, log_io: nil)
       config = a_valid_config.merge(with_config_containing)
-      MCPCompose::Server.new(config: config, client_builder: client_builder)
+      MCPCompose::Server.new(config: config, client_builder: client_builder, log_io: log_io)
     end
 
     def a_valid_config
