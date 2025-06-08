@@ -59,5 +59,27 @@ module MCPCompose
         client_builder.build(config)
       end
     end
+
+    it "passes log_io kwarg to IOClient when provided" do
+      fake_io = FakeJSONRPCIO.new
+      log_io = StringIO.new
+      shell_context.expect(:spawn_process, fake_io, ["echo hello"])
+
+      config = {
+        transport: {
+          type: "stdio",
+          command: "echo hello"
+        }
+      }
+
+      client = client_builder.build(config, log_io: log_io)
+      client.connect
+
+      shell_context.verify
+
+      value(fake_io.received_messages.size).must_equal 2
+      value(log_io.string).must_include(">> ")
+      value(log_io.string).must_include("<< ")
+    end
   end
 end
