@@ -4,7 +4,7 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe Server do
-    let(:client_builder) { Minitest::Mock.new }
+    let(:client_builder) { Mock.new }
 
     specify "specifying the server name" do
       server = build_server(with_config_containing: {
@@ -17,16 +17,10 @@ module MCPCompose
     end
 
     specify "creates a client for each server in configuration" do
-      mock_client1 = Minitest::Mock.new
-      mock_client2 = Minitest::Mock.new
-
       server_config1 = {transport: {type: "stdio", command: "server1"}}
       server_config2 = {transport: {type: "stdio", command: "server2"}}
-
-      client_builder.expect :build, mock_client1, [server_config1]
-      client_builder.expect :build, mock_client2, [server_config2]
-      mock_client1.expect :connect, nil
-      mock_client2.expect :connect, nil
+      client_builder.mock.method(:build).expects_call_with(server_config1)
+      client_builder.mock.method(:build).expects_call_with(server_config2)
 
       build_server(with_config_containing: {
         name: "test",
@@ -36,20 +30,18 @@ module MCPCompose
         }
       })
 
-      client_builder.verify
+      client_builder.mock.assert_expected_calls_received
     end
 
     specify "connects to all clients during initialization" do
-      mock_client1 = Minitest::Mock.new
-      mock_client2 = Minitest::Mock.new
-
       server_config1 = {transport: {type: "stdio", command: "server1"}}
       server_config2 = {transport: {type: "stdio", command: "server2"}}
-
-      client_builder.expect :build, mock_client1, [server_config1]
-      client_builder.expect :build, mock_client2, [server_config2]
-      mock_client1.expect :connect, nil
-      mock_client2.expect :connect, nil
+      mock_client1 = Mock.new
+      mock_client2 = Mock.new
+      client_builder.mock.method(:build).expects_call_with(server_config1).returns(mock_client1)
+      client_builder.mock.method(:build).expects_call_with(server_config2).returns(mock_client2)
+      mock_client1.mock.method(:connect).expects_call
+      mock_client2.mock.method(:connect).expects_call
 
       build_server(with_config_containing: {
         name: "test",
@@ -59,21 +51,13 @@ module MCPCompose
         }
       })
 
-      mock_client1.verify
-      mock_client2.verify
+      mock_client1.mock.assert_expected_calls_received
+      mock_client2.mock.assert_expected_calls_received
     end
 
     specify "can use log_io to log communication of clients" do
       log_output = StringIO.new
-      mock_client = Minitest::Mock.new
       server_config = {transport: {type: "stdio", command: "test-server"}}
-
-      client_builder.expect(:build, mock_client) do |config, log_io:|
-        log_io.puts "test message"
-        value(config).must_equal server_config
-        mock_client
-      end
-      mock_client.expect :connect, nil
 
       build_server(
         with_config_containing: {
@@ -85,7 +69,9 @@ module MCPCompose
         log_io: log_output
       )
 
-      client_builder.verify
+      call = client_builder.mock.calls.find { |call| call[:method] == :build }
+      client_log_io = call[:kwargs][:log_io]
+      client_log_io.puts "test message"
       value(log_output.string).must_include "[server1] test message\n"
     end
 

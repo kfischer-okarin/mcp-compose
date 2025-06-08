@@ -4,12 +4,12 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe ClientBuilder do
-    let(:shell_context) { Minitest::Mock.new }
+    let(:shell_context) { Mock.new }
     let(:client_builder) { ClientBuilder.new(shell_context: shell_context) }
 
     it "uses shell_context to spawn process for stdio transport" do
       fake_io = FakeJSONRPCIO.new
-      shell_context.expect(:spawn_process, fake_io, ["echo hello"])
+      shell_context.mock.method(:spawn_process).expects_call_with("echo hello").returns(fake_io)
 
       config = {
         transport: {
@@ -21,8 +21,7 @@ module MCPCompose
       client = client_builder.build(config)
       client.connect
 
-      shell_context.verify
-
+      shell_context.mock.assert_expected_calls_received
       value(fake_io.received_messages.size).must_equal 2
       value(fake_io.received_messages[0][:method]).must_equal "initialize"
       value(fake_io.received_messages[1][:method]).must_equal "notifications/initialized"
@@ -43,7 +42,7 @@ module MCPCompose
     it "passes log_io kwarg to IOClient when provided" do
       fake_io = FakeJSONRPCIO.new
       log_io = StringIO.new
-      shell_context.expect(:spawn_process, fake_io, ["echo hello"])
+      shell_context.mock.method(:spawn_process).expects_call_with("echo hello").returns(fake_io)
 
       config = {
         transport: {
@@ -55,8 +54,7 @@ module MCPCompose
       client = client_builder.build(config, log_io: log_io)
       client.connect
 
-      shell_context.verify
-
+      shell_context.mock.assert_expected_calls_received
       value(fake_io.received_messages.size).must_equal 2
       value(log_io.string).must_include(">> ")
       value(log_io.string).must_include("<< ")
