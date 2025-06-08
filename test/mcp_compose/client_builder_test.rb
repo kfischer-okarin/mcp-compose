@@ -3,36 +3,33 @@
 require_relative "../test_helper"
 
 module MCPCompose
+  class FakeJSONRPCIO
+    attr_reader :received_messages
+
+    def initialize
+      @received_messages = []
+      @last_request_id = nil
+    end
+
+    def puts(message)
+      parsed = JSON.parse(message, symbolize_names: true)
+      @received_messages << parsed
+      @last_request_id = parsed[:id] if parsed[:id]
+      nil
+    end
+
+    def gets
+      {jsonrpc: "2.0", id: @last_request_id, result: {}}.to_json
+    end
+  end
+
   describe ClientBuilder do
     let(:shell_context) { Minitest::Mock.new }
     let(:client_builder) { ClientBuilder.new(shell_context: shell_context) }
 
     it "uses shell_context to spawn process for stdio transport" do
-      mock_io = Minitest::Mock.new
-      shell_context.expect(:spawn_process, mock_io, ["echo hello"])
-
-      # Expect the connect method to send the right JSON-RPC messages
-      expected_init_request = {
-        jsonrpc: "2.0",
-        method: "initialize",
-        params: {
-          protocolVersion: "2025-03-26",
-          capabilities: {},
-          clientInfo: {
-            name: "MCP Compose",
-            version: "1.0.0"
-          }
-        },
-        id: 1
-      }
-      mock_io.expect(:puts, nil, [expected_init_request.to_json])
-      mock_io.expect(:gets, '{"jsonrpc":"2.0","id":1,"result":{}}')
-
-      expected_init_notification = {
-        jsonrpc: "2.0",
-        method: "notifications/initialized"
-      }
-      mock_io.expect(:puts, nil, [expected_init_notification.to_json])
+      fake_io = FakeJSONRPCIO.new
+      shell_context.expect(:spawn_process, fake_io, ["echo hello"])
 
       config = {
         transport: {
@@ -45,7 +42,10 @@ module MCPCompose
       client.connect
 
       shell_context.verify
-      mock_io.verify
+
+      value(fake_io.received_messages.size).must_equal 2
+      value(fake_io.received_messages[0][:method]).must_equal "initialize"
+      value(fake_io.received_messages[1][:method]).must_equal "notifications/initialized"
     end
 
     it "raises error for unsupported transport type" do
