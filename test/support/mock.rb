@@ -71,16 +71,61 @@ class Mock
           end
 
           unless matching_call
-            raise "Expected #{expectation[:method]} to be called with args: #{expectation[:args].inspect}, kwargs: #{expectation[:kwargs].inspect}, but it wasn't"
+            method_calls = @calls.select { |call| call[:method] == expectation[:method] }
+            actual_calls_msg = if method_calls.empty?
+              "Method '#{expectation[:method]}' was never called."
+            else
+              "Method '#{expectation[:method]}' was called #{method_calls.size} time(s) with:\n" +
+                method_calls.map.with_index do |call, i|
+                  "  #{i + 1}. args: #{call[:args].inspect}, kwargs: #{call[:kwargs].inspect}"
+                end.join("\n")
+            end
+
+            raise <<~ERROR
+              Expected #{expectation[:method]} to be called with args: #{expectation[:args].inspect}, kwargs: #{expectation[:kwargs].inspect}
+
+              Actual calls:
+              #{actual_calls_msg}
+
+              All method calls:
+              #{format_all_calls}
+            ERROR
           end
         else
           matching_call = @calls.find { |call| call[:method] == expectation[:method] }
 
           unless matching_call
-            raise "Expected #{expectation[:method]} to be called, but it wasn't"
+            raise <<~ERROR
+              Expected #{expectation[:method]} to be called
+
+              Actual calls:
+              Method '#{expectation[:method]}' was never called.
+
+              All method calls:
+              #{format_all_calls}
+            ERROR
           end
         end
       end
+    end
+
+    private
+
+    def format_all_calls
+      if @calls.empty?
+        "  No methods were called"
+      else
+        @calls.map.with_index do |call, i|
+          "  #{i + 1}. #{call[:method]}(#{format_call_args(call)})"
+        end.join("\n")
+      end
+    end
+
+    def format_call_args(call)
+      parts = []
+      parts << call[:args].map(&:inspect).join(", ") unless call[:args].empty?
+      parts << call[:kwargs].map { |k, v| "#{k}: #{v.inspect}" }.join(", ") unless call[:kwargs].empty?
+      parts.join(", ")
     end
   end
 
