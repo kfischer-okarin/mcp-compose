@@ -12,3 +12,11 @@ Rake::TestTask.new(:test) do |t|
   t.test_files = FileList["test/**/*_test.rb"]
   t.verbose = true
 end
+
+namespace :test do
+  desc "Run tests with acceptance test logging enabled"
+  task :debug do
+    ENV["ACCEPTANCE_TEST_LOGS"] = "1"
+    Rake::Task["test"].invoke
+  end
+end

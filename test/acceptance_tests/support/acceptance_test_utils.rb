@@ -8,10 +8,6 @@ require_relative "../../../lib/mcp_compose/io_client"
 # not listed among the available DSL methods.
 module AcceptanceTestUtils
   class << self
-    def log_file
-      @log_file ||= File.open(local_tmp_dir / "mcp-compose-acceptance-tests.log", "w")
-    end
-
     def local_tmp_dir
       (project_root_dir / "tmp").tap(&:mkpath)
     end
@@ -21,11 +17,6 @@ module AcceptanceTestUtils
       current = current.parent until (current / "Gemfile").exist?
       current
     end
-  end
-
-  def before_setup
-    AcceptanceTestUtils.log_file.puts
-    AcceptanceTestUtils.log_file.puts("=== #{self.class.name} - #{name} ===")
   end
 
   private
@@ -39,9 +30,13 @@ module AcceptanceTestUtils
       ensure_base_dir_is_prepared
 
       mcp_compose_absolute_path = AcceptanceTestUtils.project_root_dir / "exe" / "mcp-compose"
-      stream = IO.popen([mcp_compose_absolute_path.to_s], "r+", chdir: @base_dir)
+      args = [mcp_compose_absolute_path.to_s]
+      args << "--log-server-communication" if ENV["ACCEPTANCE_TEST_LOGS"]
 
-      @client = MCPCompose::IOClient.new(stream, log_io: AcceptanceTestUtils.log_file)
+      stream = IO.popen(args, "r+", chdir: @base_dir)
+
+      log_io = ENV["ACCEPTANCE_TEST_LOGS"] ? $stderr : nil
+      @client = MCPCompose::IOClient.new(stream, log_io: log_io)
       @client.connect
     end
 
