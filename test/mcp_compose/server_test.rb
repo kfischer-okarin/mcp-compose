@@ -94,7 +94,13 @@ module MCPCompose
     end
 
     def a_valid_config
-      {name: "test"}
+      {
+        name: "test",
+        servers: {
+          server1: {transport: {type: "stdio", command: "server1"}},
+          server2: {transport: {type: "stdio", command: "server2"}}
+        }
+      }
     end
 
     def initialize_request
