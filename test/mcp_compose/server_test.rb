@@ -58,6 +58,36 @@ module MCPCompose
       mock_client2.mock.assert_expected_calls_received
     end
 
+    specify "lists tools from all clients" do
+      server_config1 = a_valid_server_config
+      server_config2 = a_valid_server_config
+      mock_client1 = build_mock_client
+      mock_client2 = build_mock_client
+      client_builder.mock.method(:build).expects_call_with(server_config1).returns(mock_client1)
+      client_builder.mock.method(:build).expects_call_with(server_config2).returns(mock_client2)
+      mock_client1.mock.method(:list_tools).expects_call.returns([
+        {name: "tool1"}
+      ])
+      mock_client2.mock.method(:list_tools).expects_call.returns([
+        {name: "tool2"}
+      ])
+      server = build_server(with_config_containing: {
+        servers: {
+          server1: server_config1,
+          server2: server_config2
+        }
+      })
+
+      response = server.handle_request(tools_list_request)
+
+      value(response[:result]).must_equal tools: [
+        {name: "tool1"},
+        {name: "tool2"}
+      ]
+      mock_client1.mock.assert_expected_calls_received
+      mock_client2.mock.assert_expected_calls_received
+    end
+
     specify "can use log_io to log communication of clients" do
       log_output = StringIO.new
       build_server(
@@ -115,6 +145,15 @@ module MCPCompose
           }
         },
         id: 1
+      }
+    end
+
+    def tools_list_request
+      {
+        jsonrpc: "2.0",
+        method: "tools/list",
+        params: {},
+        id: 2
       }
     end
   end

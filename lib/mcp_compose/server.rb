@@ -11,9 +11,10 @@ module MCPCompose
       @config = config
       @client_builder = client_builder
       @log_io = log_io
-      @wrapped_server = MCP::Server.new(name: config[:name])
       @clients = build_clients
       connect_clients
+      @wrapped_server = MCP::Server.new(name: config[:name])
+      setup_tools_list_handler
     end
 
     def handle_request(request)
@@ -41,6 +42,14 @@ module MCPCompose
         Thread.new { client.connect }
       }
       threads.each(&:join)
+    end
+
+    def setup_tools_list_handler
+      @wrapped_server.tools_list_handler do
+        @clients.flat_map { |server_name, client|
+          client.list_tools
+        }
+      end
     end
   end
 end

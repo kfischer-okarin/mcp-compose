@@ -3,7 +3,7 @@
 require_relative "support/acceptance_test_helper"
 
 feature "Forwarding Tools" do
-  scenario "forwards the tools of a server", wip: true do
+  scenario "forwards the tools of a server" do
     given_a_mcp_server("weather-mcp") {
       with_tools Fixtures.weather_tool
     }
