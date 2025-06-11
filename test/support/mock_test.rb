@@ -222,4 +222,16 @@ describe Mock do
 
     mock.mock.assert_expected_calls_received
   end
+
+  it "both supports specific argument returns and default returns" do
+    mock = Mock.new
+
+    mock.mock.method(:calculate).returns(100)
+    mock.mock.method(:calculate).expects_call_with(5, 10).returns(15)
+
+    value(mock.calculate(5, 10)).must_equal 15
+    value(mock.calculate(1, 2)).must_equal 100
+
+    mock.mock.assert_expected_calls_received
+  end
 end
