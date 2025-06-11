@@ -210,4 +210,16 @@ describe Mock do
       mock.mock.assert_expected_calls_received
     end
   end
+
+  it "allows configuration via block passed to constructor" do
+    mock = Mock.new do
+      method(:greet).expects_call_with("Alice").returns("Hello Alice")
+      method(:farewell).returns("Goodbye")
+    end
+
+    value(mock.greet("Alice")).must_equal "Hello Alice"
+    value(mock.farewell).must_equal "Goodbye"
+
+    mock.mock.assert_expected_calls_received
+  end
 end

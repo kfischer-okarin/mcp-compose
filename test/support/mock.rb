@@ -3,8 +3,9 @@
 class Mock
   attr_reader :mock
 
-  def initialize
+  def initialize(&block)
     @mock = MockRecorder.new
+    @mock.instance_eval(&block) if block_given?
   end
 
   def method_missing(method_name, *args, **kwargs, &block)
