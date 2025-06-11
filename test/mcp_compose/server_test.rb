@@ -28,7 +28,6 @@ module MCPCompose
       client_builder.mock.method(:build).expects_call_with(server_config2)
 
       build_server(with_config_containing: {
-        name: "test",
         servers: {
           server1: server_config1,
           server2: server_config2
@@ -49,7 +48,6 @@ module MCPCompose
       mock_client2.mock.method(:connect).expects_call
 
       build_server(with_config_containing: {
-        name: "test",
         servers: {
           server1: server_config1,
           server2: server_config2
@@ -66,7 +64,6 @@ module MCPCompose
 
       build_server(
         with_config_containing: {
-          name: "test",
           servers: {
             server1: server_config
           }
