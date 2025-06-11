@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require_relative "../test_helper"
 
 module MCPCompose
@@ -88,28 +89,34 @@ module MCPCompose
       mock_client2.mock.assert_expected_calls_received
     end
 
-    specify "can use log_io to log communication of clients" do
+    specify "can use logger to log communication of clients" do
       log_output = StringIO.new
+      logger = Logger.new(log_output)
+      logger.progname = "mcp-compose"
+
       build_server(
         with_config_containing: {
           servers: {
             server1: a_valid_server_config
           }
         },
-        log_io: log_output
+        logger: logger
       )
 
       call = client_builder.mock.calls.find { |call| call[:method] == :build }
-      client_log_io = call[:kwargs][:log_io]
-      client_log_io.puts "test message"
-      value(log_output.string).must_include "[server1] test message\n"
+      client_logger = call[:kwargs][:logger]
+
+      client_logger.info "test message"
+      value(log_output.string).must_include "test message"
+      value(log_output.string).must_include "INFO"
+      value(log_output.string).must_include "mcp-compose[server1]"
     end
 
     private
 
-    def build_server(with_config_containing: {}, log_io: nil)
+    def build_server(with_config_containing: {}, logger: nil)
       config = a_valid_config.merge(with_config_containing)
-      MCPCompose::Server.new(config: config, client_builder: client_builder, log_io: log_io)
+      MCPCompose::Server.new(config: config, client_builder: client_builder, logger: logger)
     end
 
     def build_mock_client

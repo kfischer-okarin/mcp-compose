@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require_relative "../test_helper"
 
 module MCPCompose
@@ -45,14 +46,19 @@ module MCPCompose
     end
 
     describe "with --log-server-communication flag" do
-      it "passes stderr as log_io to the server when flag is present" do
+      it "passes logger to the server when flag is present" do
         shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
         parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
         server = Mock.new
-        build_server.mock.method(:call).expects_call_with(:parse_result, log_io: $stderr).returns(server)
+        build_server.mock.method(:call).expects_call.returns(server)
         server.mock.method(:run).expects_call
 
         cli.run(shell_context: shell_context, args: ["--log-server-communication"])
+
+        # Verify the logger was passed correctly
+        build_server_call = build_server.mock.calls.find { |c| c[:method] == :call }
+        value(build_server_call[:kwargs][:logger]).must_be_kind_of Logger
+        value(build_server_call[:kwargs][:logger].progname).must_equal "mcp-compose"
 
         shell_context.mock.assert_expected_calls_received
         parse_config.mock.assert_expected_calls_received

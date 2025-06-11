@@ -8,8 +8,8 @@ parse_config = ->(content) { config_parser.parse(content) }
 shell_context = MCPCompose::Util::ShellContext.new(cwd: Dir.pwd)
 client_builder = MCPCompose::ClientBuilder.new(shell_context: shell_context)
 
-build_server = ->(config, log_io: nil) do
-  MCPCompose::Server.new(config: config, client_builder: client_builder, log_io: log_io)
+build_server = ->(config, logger: nil) do
+  MCPCompose::Server.new(config: config, client_builder: client_builder, logger: logger)
 end
 
 cli = MCPCompose::CLI.new(parse_config_function: parse_config, build_server_function: build_server)

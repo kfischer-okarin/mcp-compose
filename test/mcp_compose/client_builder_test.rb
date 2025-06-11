@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require_relative "../test_helper"
 
 module MCPCompose
@@ -39,9 +40,10 @@ module MCPCompose
       end
     end
 
-    it "passes log_io kwarg to IOClient when provided" do
+    it "passes logger kwarg to IOClient when provided" do
       fake_io = FakeJSONRPCIO.new
       log_io = StringIO.new
+      logger = Logger.new(log_io)
       shell_context.mock.method(:spawn_process).expects_call_with("echo hello").returns(fake_io)
 
       config = {
@@ -51,7 +53,7 @@ module MCPCompose
         }
       }
 
-      client = client_builder.build(config, log_io: log_io)
+      client = client_builder.build(config, logger: logger)
       client.connect
 
       shell_context.mock.assert_expected_calls_received

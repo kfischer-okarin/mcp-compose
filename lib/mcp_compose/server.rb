@@ -6,11 +6,14 @@ require "mcp/transports/stdio"
 require_relative "util/prefixed_io"
 
 module MCPCompose
+  # @param config [Hash] the configuration for the server
+  # @param client_builder [ClientBuilder] the client builder to use for creating clients
+  # @param logger [Logger] optional Logger instance for logging
   class Server
-    def initialize(config:, client_builder:, log_io: nil)
+    def initialize(config:, client_builder:, logger: nil)
       @config = config
       @client_builder = client_builder
-      @log_io = log_io
+      @logger = logger
       @clients = build_clients
       connect_clients
       @wrapped_server = MCP::Server.new(name: config[:name])
@@ -32,7 +35,12 @@ module MCPCompose
 
       @config[:servers].map { |server_name, server_config|
         build_args = {}
-        build_args[:log_io] = Util::PrefixedIO.new(@log_io, "[#{server_name}] ") if @log_io
+        if @logger
+          # Clone the logger and append the server name to the progname
+          client_logger = @logger.dup
+          client_logger.progname = "#{@logger.progname}[#{server_name}]"
+          build_args[:logger] = client_logger
+        end
         [server_name, @client_builder.build(server_config, **build_args)]
       }.to_h
     end

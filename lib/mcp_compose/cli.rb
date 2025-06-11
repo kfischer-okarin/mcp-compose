@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "logger"
+
 module MCPCompose
   # This class is a humble object implementing the command line interface for
   # mcp-compose.
@@ -23,7 +25,9 @@ module MCPCompose
       config = @parse_config_function.call(config_content)
 
       server = if log_server_communication
-        @build_server_function.call(config, log_io: $stderr)
+        logger = Logger.new($stderr)
+        logger.progname = "mcp-compose"
+        @build_server_function.call(config, logger: logger)
       else
         @build_server_function.call(config)
       end

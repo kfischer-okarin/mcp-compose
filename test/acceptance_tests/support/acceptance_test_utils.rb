@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require "pathname"
 
 require_relative "../../../lib/mcp_compose/io_client"
@@ -35,8 +36,8 @@ module AcceptanceTestUtils
 
       stream = IO.popen(args, "r+", chdir: @base_dir)
 
-      log_io = ENV["ACCEPTANCE_TEST_LOGS"] ? $stderr : nil
-      @client = MCPCompose::IOClient.new(stream, log_io: log_io)
+      logger = ENV["ACCEPTANCE_TEST_LOGS"] ? Logger.new($stderr) : nil
+      @client = MCPCompose::IOClient.new(stream, logger: logger)
       @client.connect
     end
 

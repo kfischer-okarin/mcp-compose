@@ -6,10 +6,11 @@ module MCPCompose
   # A simple MCP client communicating via a single bidirectional IO object
   class IOClient
     # @param io [IO] The IO object to use for communication
-    # @param log_io [IO] The IO object to use for logging (optional)
-    def initialize(io, log_io: nil)
+    # @param logger [Logger] The Logger instance to use for logging (optional)
+    #   If provided, all sent and received data will be logged at INFO level
+    def initialize(io, logger: nil)
       @io = io
-      @log_io = log_io
+      @logger = logger
       @next_id = 1
     end
 
@@ -60,13 +61,13 @@ module MCPCompose
     end
 
     def send_via_io(message)
-      @log_io&.puts(">> #{message}")
+      @logger&.info(">> #{message}")
       @io.puts(message)
     end
 
     def receive_from_io
       message = @io.gets
-      @log_io&.puts("<< #{message}")
+      @logger&.info("<< #{message}")
       message
     end
   end

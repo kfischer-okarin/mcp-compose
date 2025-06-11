@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require "socket"
 require "stringio"
 
@@ -56,9 +57,10 @@ module MCPCompose
       value(connect_thread).wont_be :alive?
     end
 
-    it "logs all sent and received data when log_io is provided" do
+    it "logs all sent and received data when logger is provided" do
       log_io = StringIO.new
-      client = IOClient.new(client_side_io, log_io: log_io)
+      logger = Logger.new(log_io)
+      client = IOClient.new(client_side_io, logger: logger)
 
       connect_thread = Thread.new do
         client.connect
@@ -69,10 +71,16 @@ module MCPCompose
       next_client_message
       connect_thread.join
 
-      log_content_lines = log_io.string.split("\n")
-      value(log_content_lines[0]).must_include ">> {\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":"
-      value(log_content_lines[1]).must_equal "<< \"some response\""
-      value(log_content_lines[2]).must_equal ">> {\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}"
+      log_content = log_io.string
+      value(log_content).must_include ">> {\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":"
+      value(log_content).must_include "<< \"some response\""
+      value(log_content).must_include ">> {\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}"
+
+      # Assert that messages are logged at INFO level
+      log_lines = log_content.split("\n")
+      log_lines.each do |line|
+        value(line).must_include "INFO" if line.include?(">>") || line.include?("<<")
+      end
     end
 
     it "can retrieve the tools list" do

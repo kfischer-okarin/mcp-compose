@@ -26,6 +26,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "mcp", "~> 0.1.0"
   # JSON Schema validator
   spec.add_dependency "json_schemer", "~> 2.4"
+  # Logger
+  spec.add_dependency "logger", "~> 1.7"
 
   # Testing Framework
   spec.add_development_dependency "minitest", "~> 5.25"
