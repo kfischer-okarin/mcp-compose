@@ -13,13 +13,16 @@ module MCPCompose
         mock.method(:call).returns(server)
       end
     }
+    let(:build_server_call) {
+      build_server.mock.calls.find { |c| c[:method] == :call }
+    }
     let(:shell_context) { Mock.new }
     let(:cli) { CLI.new(parse_config_function: parse_config, build_server_function: build_server) }
 
     it "parses the mcp-compose.yml file in the current directory and uses it to start the server" do
       shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
       parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
-      build_server.mock.method(:call).expects_call_with(:parse_result).returns(built_server)
+      build_server.mock.method(:call).expects_call.returns(built_server)
       built_server.mock.method(:run).expects_call
 
       cli.run(shell_context: shell_context, args: [])
@@ -27,6 +30,7 @@ module MCPCompose
       shell_context.mock.assert_expected_calls_received
       parse_config.mock.assert_expected_calls_received
       build_server.mock.assert_expected_calls_received
+      value(build_server_call[:args]).must_equal [:parse_result]
       built_server.mock.assert_expected_calls_received
     end
 
@@ -50,40 +54,28 @@ module MCPCompose
       value(exception.message).must_include("invalid configuration")
     end
 
-    describe "with --log-server-communication flag" do
-      it "passes logger to the server when flag is present" do
-        shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
-        parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
-        server = Mock.new
-        build_server.mock.method(:call).expects_call.returns(server)
-        server.mock.method(:run).expects_call
+    describe "with --log-level argument" do
+      %w[debug info warn error].each do |level|
+        it "passes logger with #{level.upcase} level when --log-level=#{level} is present" do
+          cli.run(shell_context: shell_context, args: ["--log-level=#{level}"])
 
-        cli.run(shell_context: shell_context, args: ["--log-server-communication"])
-
-        # Verify the logger was passed correctly
-        build_server_call = build_server.mock.calls.find { |c| c[:method] == :call }
-        value(build_server_call[:kwargs][:logger]).must_be_kind_of Logger
-        value(build_server_call[:kwargs][:logger].progname).must_equal "mcp-compose"
-
-        shell_context.mock.assert_expected_calls_received
-        parse_config.mock.assert_expected_calls_received
-        build_server.mock.assert_expected_calls_received
-        server.mock.assert_expected_calls_received
+          logger_arg = build_server_call[:kwargs][:logger]
+          value(logger_arg.level).must_equal Logger.const_get(level.upcase)
+        end
       end
 
-      it "does not pass log_io when flag is absent" do
-        shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
-        parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
-        server = Mock.new
-        build_server.mock.method(:call).expects_call_with(:parse_result).returns(server)
-        server.mock.method(:run).expects_call
+      it "raises error for invalid log level" do
+        exception = assert_raises(CLI::Error) do
+          cli.run(shell_context: shell_context, args: ["--log-level=invalid"])
+        end
 
+        value(exception.message).must_include("Invalid log level: invalid")
+      end
+
+      it "uses INFO as default log level when no --log-level is specified" do
         cli.run(shell_context: shell_context, args: [])
 
-        shell_context.mock.assert_expected_calls_received
-        parse_config.mock.assert_expected_calls_received
-        build_server.mock.assert_expected_calls_received
-        server.mock.assert_expected_calls_received
+        value(build_server_call[:kwargs][:logger].level).must_equal Logger::INFO
       end
     end
   end

@@ -32,7 +32,9 @@ module AcceptanceTestUtils
 
       mcp_compose_absolute_path = AcceptanceTestUtils.project_root_dir / "exe" / "mcp-compose"
       args = [mcp_compose_absolute_path.to_s]
-      args << "--log-server-communication" if ENV["ACCEPTANCE_TEST_LOGS"]
+      # Suppress the server logs by default
+      server_log_level = ENV["ACCEPTANCE_TEST_LOGS"] ? "debug" : "warn"
+      args << "--log-level=#{server_log_level}"
 
       stream = IO.popen(args, "r+", chdir: @base_dir)
 
