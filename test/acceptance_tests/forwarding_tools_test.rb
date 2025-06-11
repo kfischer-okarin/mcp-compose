@@ -26,7 +26,7 @@ feature "Forwarding Tools" do
     list_tools_result = list_tools
 
     value(list_tools_result.length).must_equal(2)
-    value(list_tools_result).must_include(weather_tool)
-    value(list_tools_result).must_include(hello_tool)
+    value(list_tools_result).must_include(Fixtures.weather_tool)
+    value(list_tools_result).must_include(Fixtures.hello_tool)
   end
 end
