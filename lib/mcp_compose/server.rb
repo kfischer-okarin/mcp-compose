@@ -3,8 +3,6 @@
 require "mcp"
 require "mcp/transports/stdio"
 
-require_relative "util/prefixed_io"
-
 module MCPCompose
   # @param config [Hash] the configuration for the server
   # @param client_builder [ClientBuilder] the client builder to use for creating clients
