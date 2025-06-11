@@ -10,7 +10,7 @@ module MCPCompose
     let(:shell_context) { Mock.new }
     let(:cli) { CLI.new(parse_config_function: parse_config, build_server_function: build_server) }
 
-    it "reads the mcp-compose.yml file in the current directory" do
+    it "parses the mcp-compose.yml file in the current directory and uses it to start the server" do
       shell_context.mock.method(:read_file).expects_call_with("mcp-compose.yml").returns(:mcp_compose_content)
       parse_config.mock.method(:call).expects_call_with(:mcp_compose_content).returns(:parse_result)
       server = Mock.new
