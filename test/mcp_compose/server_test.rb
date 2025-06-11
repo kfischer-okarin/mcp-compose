@@ -4,7 +4,12 @@ require_relative "../test_helper"
 
 module MCPCompose
   describe Server do
-    let(:client_builder) { Mock.new }
+    let(:client_builder) {
+      mock_client = build_mock_client
+      Mock.new do
+        method(:build).returns(mock_client)
+      end
+    }
 
     specify "specifying the server name" do
       server = build_server(with_config_containing: {
@@ -36,8 +41,8 @@ module MCPCompose
     specify "connects to all clients during initialization" do
       server_config1 = {transport: {type: "stdio", command: "server1"}}
       server_config2 = {transport: {type: "stdio", command: "server2"}}
-      mock_client1 = Mock.new
-      mock_client2 = Mock.new
+      mock_client1 = build_mock_client
+      mock_client2 = build_mock_client
       client_builder.mock.method(:build).expects_call_with(server_config1).returns(mock_client1)
       client_builder.mock.method(:build).expects_call_with(server_config2).returns(mock_client2)
       mock_client1.mock.method(:connect).expects_call
@@ -80,6 +85,12 @@ module MCPCompose
     def build_server(with_config_containing: {}, log_io: nil)
       config = a_valid_config.merge(with_config_containing)
       MCPCompose::Server.new(config: config, client_builder: client_builder, log_io: log_io)
+    end
+
+    def build_mock_client
+      Mock.new do
+        method(:list_tools).returns([])
+      end
     end
 
     def a_valid_config
