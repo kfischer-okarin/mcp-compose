@@ -22,8 +22,8 @@ module MCPCompose
     end
 
     specify "creates a client for each server in configuration" do
-      server_config1 = {transport: {type: "stdio", command: "server1"}}
-      server_config2 = {transport: {type: "stdio", command: "server2"}}
+      server_config1 = a_valid_server_config
+      server_config2 = a_valid_server_config
       client_builder.mock.method(:build).expects_call_with(server_config1)
       client_builder.mock.method(:build).expects_call_with(server_config2)
 
@@ -38,8 +38,8 @@ module MCPCompose
     end
 
     specify "connects to all clients during initialization" do
-      server_config1 = {transport: {type: "stdio", command: "server1"}}
-      server_config2 = {transport: {type: "stdio", command: "server2"}}
+      server_config1 = a_valid_server_config
+      server_config2 = a_valid_server_config
       mock_client1 = build_mock_client
       mock_client2 = build_mock_client
       client_builder.mock.method(:build).expects_call_with(server_config1).returns(mock_client1)
@@ -60,12 +60,10 @@ module MCPCompose
 
     specify "can use log_io to log communication of clients" do
       log_output = StringIO.new
-      server_config = {transport: {type: "stdio", command: "test-server"}}
-
       build_server(
         with_config_containing: {
           servers: {
-            server1: server_config
+            server1: a_valid_server_config
           }
         },
         log_io: log_output
@@ -94,10 +92,14 @@ module MCPCompose
       {
         name: "test",
         servers: {
-          server1: {transport: {type: "stdio", command: "server1"}},
-          server2: {transport: {type: "stdio", command: "server2"}}
+          server1: a_valid_server_config,
+          server2: a_valid_server_config
         }
       }
+    end
+
+    def a_valid_server_config
+      {transport: {type: "stdio", command: "server#{rand(1000)}"}}
     end
 
     def initialize_request
