@@ -50,8 +50,8 @@ class Mock
     end
 
     def execute_stub(method_name, args, kwargs)
-      # First, try to find a stub that matches the exact arguments
-      matching_stub = @stub_list.find do |stub|
+      # First, try to find a stub that matches the exact arguments (search from end to find latest)
+      matching_stub = @stub_list.reverse.find do |stub|
         stub[:method] == method_name &&
           stub[:args_matter] &&
           stub[:args] == args &&

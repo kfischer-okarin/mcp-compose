@@ -234,4 +234,26 @@ describe Mock do
 
     mock.mock.assert_expected_calls_received
   end
+
+  it "uses latest return value for default returns" do
+    mock = Mock.new
+
+    mock.mock.method(:status).returns("first")
+    mock.mock.method(:status).returns("second")
+    mock.mock.method(:status).returns("latest")
+
+    value(mock.status).must_equal "latest"
+  end
+
+  it "uses latest return value for specific argument expectations" do
+    mock = Mock.new
+
+    mock.mock.method(:greet).expects_call_with("Alice").returns("Hello")
+    mock.mock.method(:greet).expects_call_with("Alice").returns("Hi")
+    mock.mock.method(:greet).expects_call_with("Alice").returns("Hey")
+
+    value(mock.greet("Alice")).must_equal "Hey"
+
+    mock.mock.assert_expected_calls_received
+  end
 end
