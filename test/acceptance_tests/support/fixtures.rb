@@ -14,7 +14,8 @@ module Fixtures
             type: "string",
             description: "The location to get the weather for"
           }
-        }
+        },
+        required: []
       }
     }
   end
@@ -25,7 +26,8 @@ module Fixtures
       description: "Say hello",
       inputSchema: {
         type: "object",
-        properties: {}
+        properties: {},
+        required: []
       }
     }
   end
