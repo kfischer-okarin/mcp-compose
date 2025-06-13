@@ -10,6 +10,8 @@ module MCPCompose
   # @param shell_context [Util::ShellContext] the shell context to use for
   #   spawning processes
   class ClientBuilder
+    class BuildError < StandardError; end
+
     def initialize(shell_context:)
       @shell_context = shell_context
     end
@@ -22,8 +24,12 @@ module MCPCompose
 
       case transport[:type]
       when "stdio"
-        io = @shell_context.spawn_process(transport[:command])
-        IOClient.new(io, logger: logger)
+        begin
+          io = @shell_context.spawn_process(transport[:command])
+          IOClient.new(io, logger: logger)
+        rescue Util::ShellContext::FileNotFoundError => e
+          raise BuildError, e.message
+        end
       else
         raise ArgumentError, "Unsupported transport type: #{transport[:type]}"
       end

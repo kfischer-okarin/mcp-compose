@@ -62,6 +62,24 @@ module MCPCompose
       value(log_io.string).must_match(/>>.+initialize/)
       value(log_io.string).must_match(/<<.+result/)
     end
+
+    it "re-raises error for non existing executable" do
+      shell_context.mock.method(:spawn_process).raises(
+        Util::ShellContext::FileNotFoundError,
+        "Executable not found: nonexisting"
+      )
+      config = {
+        transport: {
+          type: "stdio",
+          command: "nonexisting"
+        }
+      }
+
+      exception = assert_raises(ClientBuilder::BuildError) do
+        client_builder.build(config)
+      end
+      value(exception.message).must_equal("Executable not found: nonexisting")
+    end
   end
 
   class FakeJSONRPCIO
