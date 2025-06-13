@@ -28,6 +28,8 @@ module MCPCompose
       # @return [IO] a bidirectional IO object
       def spawn_process(command)
         IO.popen(command, "r+", chdir: @cwd.to_s)
+      rescue Errno::ENOENT
+        raise FileNotFoundError, "Executable not found: #{@cwd / command}"
       end
     end
   end

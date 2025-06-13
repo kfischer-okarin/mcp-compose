@@ -47,6 +47,14 @@ module MCPCompose
         value(result).must_equal "Hello, world!\n"
         io.close
       end
+
+      it "raises FileNotFoundError when executable does not exist" do
+        exception = assert_raises(ShellContext::FileNotFoundError) do
+          shell_context.spawn_process("non_existent_executable")
+        end
+
+        value(exception.message).must_equal "Executable not found: #{temp_dir}/non_existent_executable"
+      end
     end
   end
 end
