@@ -21,7 +21,7 @@ module MCPCompose
       def read_file(path)
         File.read(@cwd / path)
       rescue Errno::ENOENT
-        raise FileNotFoundError
+        raise FileNotFoundError, "File not found: #{@cwd / path}"
       end
 
       # @param command [String] the command to spawn

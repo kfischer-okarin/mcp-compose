@@ -29,9 +29,11 @@ module MCPCompose
       end
 
       it "raises FileNotFoundError when file does not exist" do
-        assert_raises(ShellContext::FileNotFoundError) do
+        exception = assert_raises(ShellContext::FileNotFoundError) do
           shell_context.read_file("non_existent_file.txt")
         end
+
+        value(exception.message).must_equal "File not found: #{temp_dir}/non_existent_file.txt"
       end
 
       it "can spawn a process and return a bidirectional IO object" do
