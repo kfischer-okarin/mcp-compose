@@ -19,12 +19,10 @@ module AcceptanceTestUtils
       current
     end
 
-    def line_processing_pipe(&block)
-      read_pipe, write_pipe = IO.pipe
+    def process_each_line_of_io(io, &block)
       Thread.new do
-        read_pipe.each_line(&block)
+        io.each_line(&block)
       end
-      write_pipe
     end
   end
 
@@ -39,13 +37,14 @@ module AcceptanceTestUtils
       ensure_base_dir_is_prepared
 
       mcp_compose_absolute_path = AcceptanceTestUtils.project_root_dir / "exe" / "mcp-compose"
-      args = [mcp_compose_absolute_path.to_s]
+      command = mcp_compose_absolute_path.to_s
       # Suppress the server logs by default
       server_log_level = ENV["ACCEPTANCE_TEST_LOGS"] ? "debug" : "warn"
-      args << "--log-level=#{server_log_level}"
+      command << " --log-level=#{server_log_level}"
 
+      process_pipe = MCPCompose::Util::ProcessPipe.new(command, cwd: @base_dir)
       @error_logs = +""
-      capture_stderr_pipe = AcceptanceTestUtils.line_processing_pipe do |line|
+      AcceptanceTestUtils.process_each_line_of_io(process_pipe.stderr) do |line|
         if line.include?("ERROR --")
           # Logs emitted by the logger
           @error_logs << line
@@ -56,10 +55,8 @@ module AcceptanceTestUtils
         end
       end
 
-      stream = IO.popen(args, "r+", chdir: @base_dir, err: capture_stderr_pipe)
-
       logger = ENV["ACCEPTANCE_TEST_LOGS"] ? Logger.new($stderr) : nil
-      @client = MCPCompose::IOClient.new(stream, logger: logger)
+      @client = MCPCompose::IOClient.new(process_pipe, logger: logger)
       @client.connect
       @error_logs_during_connection = @error_logs.dup
     end
