@@ -44,10 +44,7 @@ module MCPCompose
     end
 
     def connect_clients
-      threads = @clients.values.map { |client|
-        Thread.new { client.connect }
-      }
-      threads.each(&:join)
+      for_each_in_parallel(@clients.values, &:connect)
     end
 
     def setup_tools_list_handler
@@ -56,6 +53,13 @@ module MCPCompose
           client.list_tools
         }
       end
+    end
+
+    def for_each_in_parallel(values, &block)
+      threads = values.map { |value|
+        Thread.new { block.call(value) }
+      }
+      threads.each(&:join)
     end
   end
 end
