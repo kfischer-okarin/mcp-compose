@@ -44,11 +44,14 @@ module MCPCompose
           build_args[:logger] = client_logger
         end
 
-        client = @client_builder.build(server_config, **build_args)
-        client.connect
-
-        lock.synchronize do
-          result[server_name] = client
+        begin
+          client = @client_builder.build(server_config, **build_args)
+          client.connect
+          lock.synchronize do
+            result[server_name] = client
+          end
+        rescue MCPCompose::ClientBuilder::BuildError => e
+          @logger&.error "Failed to start server '#{server_name}'. #{e.message}"
         end
       end
 
