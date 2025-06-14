@@ -41,11 +41,9 @@ module MCPCompose
 
         io = shell_context.spawn_process(command)
         io.puts "Hello, world!"
-        io.close_write
-        result = io.read
+        result = io.gets
 
         value(result).must_equal "Hello, world!\n"
-        io.close
       end
 
       it "raises FileNotFoundError when executable does not exist" do
