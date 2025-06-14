@@ -46,8 +46,14 @@ module AcceptanceTestUtils
 
       @error_logs = +""
       capture_stderr_pipe = AcceptanceTestUtils.line_processing_pipe do |line|
-        warn "STDERR: #{line}"
-        @error_logs << line
+        if line.include?("ERROR --")
+          # Logs emitted by the logger
+          @error_logs << line
+          warn line if ENV["ACCEPTANCE_TEST_LOGS"]
+        else
+          # Unexpected other errors
+          warn line
+        end
       end
 
       stream = IO.popen(args, "r+", chdir: @base_dir, err: capture_stderr_pipe)
