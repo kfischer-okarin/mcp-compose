@@ -12,8 +12,7 @@ module MCPCompose
       @config = config
       @client_builder = client_builder
       @logger = logger
-      @clients = build_clients
-      connect_clients
+      @clients = initialize_clients
       @wrapped_server = MCP::Server.new(name: config[:name])
       setup_tools_list_handler
     end
@@ -28,10 +27,15 @@ module MCPCompose
 
     private
 
-    def build_clients
+    def initialize_clients
       return {} unless @config[:servers]
 
-      @config[:servers].map { |server_name, server_config|
+      result = {}
+      lock = Thread::Mutex.new
+
+      for_each_in_parallel(@config[:servers].keys) do |server_name|
+        server_config = @config[:servers][server_name]
+
         build_args = {}
         if @logger
           # Clone the logger and append the server name to the progname
@@ -39,12 +43,16 @@ module MCPCompose
           client_logger.progname = "#{@logger.progname}[#{server_name}]"
           build_args[:logger] = client_logger
         end
-        [server_name, @client_builder.build(server_config, **build_args)]
-      }.to_h
-    end
 
-    def connect_clients
-      for_each_in_parallel(@clients.values, &:connect)
+        client = @client_builder.build(server_config, **build_args)
+        client.connect
+
+        lock.synchronize do
+          result[server_name] = client
+        end
+      end
+
+      result
     end
 
     def setup_tools_list_handler
