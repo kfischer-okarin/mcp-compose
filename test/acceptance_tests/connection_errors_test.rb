@@ -3,7 +3,7 @@
 require_relative "support/acceptance_test_helper"
 
 feature "Connection Errors" do
-  scenario "reports connection errors" do
+  scenario "reports when a server binary cannot be found" do
     given_a_mcp_server("weather-mcp") {
       with_tools Fixtures.weather_tool
     }
