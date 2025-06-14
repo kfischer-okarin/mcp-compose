@@ -46,7 +46,9 @@ module MCPCompose
 
         begin
           client = @client_builder.build(server_config, **build_args)
-          client.connect
+          with_client_error_handling(server_name) do
+            client.connect
+          end
           lock.synchronize do
             result[server_name] = client
           end
@@ -71,6 +73,13 @@ module MCPCompose
         Thread.new { block.call(value) }
       }
       threads.each(&:join)
+    end
+
+    def with_client_error_handling(server_name, &block)
+      yield
+    rescue MCPCompose::Util::ProcessPipe::ProcessExitedError => e
+      error = e.process_pipe.stderr.read.strip
+      @logger&.error "Server '#{server_name}' unexpectedly exited with error: #{error}"
     end
   end
 end

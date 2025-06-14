@@ -38,10 +38,14 @@ module AcceptanceTestDSL
       @tools += tools
     end
 
+    def exits_with_error_message(message)
+      @error_message = message
+    end
+
     def build
       executable_path = @base_dir / @name
 
-      generator = ImplementationGenerator.new(name: @name, tools: @tools)
+      generator = ImplementationGenerator.new(name: @name, tools: @tools, error_message: @error_message)
       implementation = generator.generate
 
       File.write(executable_path, implementation)
@@ -49,12 +53,22 @@ module AcceptanceTestDSL
     end
 
     class ImplementationGenerator
-      def initialize(name:, tools:)
+      def initialize(name:, tools:, error_message:)
         @name = name
         @tools = tools
+        @error_message = error_message
       end
 
       def generate
+        if @error_message
+          return <<~RUBY
+            #!/usr/bin/env ruby
+
+            warn "#{@error_message}"
+            exit 1
+          RUBY
+        end
+
         <<~RUBY
           #!/usr/bin/env ruby
 
