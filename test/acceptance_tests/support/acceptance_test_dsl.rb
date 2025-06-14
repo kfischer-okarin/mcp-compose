@@ -22,6 +22,11 @@ module AcceptanceTestDSL
     client.list_tools
   end
 
+  def error_logs_during_connection
+    client # Ensure the client is initialized
+    @error_logs_during_connection
+  end
+
   class MCPServerDSL
     def initialize(name:, base_dir:)
       @name = name

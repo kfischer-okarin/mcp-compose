@@ -55,6 +55,7 @@ module AcceptanceTestUtils
       logger = ENV["ACCEPTANCE_TEST_LOGS"] ? Logger.new($stderr) : nil
       @client = MCPCompose::IOClient.new(stream, logger: logger)
       @client.connect
+      @error_logs_during_connection = @error_logs.dup
     end
 
     @client
