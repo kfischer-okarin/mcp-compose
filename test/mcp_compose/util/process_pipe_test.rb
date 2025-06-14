@@ -39,9 +39,9 @@ module MCPCompose
       it "reports exit_status after the process finishes" do
         pipe = ProcessPipe.new("sh -c 'exit 42'", cwd: temp_dir)
 
-        until pipe.exit_status
-          sleep 0.01
-        end
+        value(pipe.exit_status).must_be_nil
+
+        sleep 0.1 until pipe.exit_status
 
         value(pipe.exit_status).must_equal 42
       end
@@ -49,9 +49,7 @@ module MCPCompose
       it "raises ProcessExitedError on read/write after the process has exited" do
         pipe = ProcessPipe.new("echo done", cwd: temp_dir)
 
-        until pipe.exit_status
-          sleep 0.01
-        end
+        sleep 0.1 until pipe.exit_status
 
         assert_raises(ProcessPipe::ProcessExitedError) do
           pipe.puts "cannot write"
