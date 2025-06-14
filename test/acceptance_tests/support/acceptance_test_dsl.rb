@@ -41,36 +41,49 @@ module AcceptanceTestDSL
     def build
       executable_path = @base_dir / @name
 
-      tools_code = @tools.map { |tool|
-        <<~RUBY
-          tools << MCP::Tool.define(
-            name: #{tool[:name].inspect},
-            description: #{tool[:description].inspect},
-            input_schema: #{tool[:inputSchema].inspect}
-          ) do |args|
-            MCP::Tool::Response.new([{ type: "text", text: "OK" }])
-          end
-        RUBY
-      }.join("\n")
-
-      # For simplicity's sake we will just reuse the current process' bundler environment so we don't have to go
-      # through the trouble of making a Gemfile, installing it etc.
-      # So this file will just directly require the mcp gem.
-      implementation = <<~RUBY
-        #!/usr/bin/env ruby
-
-        require "mcp"
-        require "mcp/transports/stdio"
-
-        tools = []
-        #{tools_code}
-
-        server = MCP::Server.new(name: "#{@name}", tools: tools)
-        MCP::Transports::StdioTransport.new(server).open
-      RUBY
+      generator = ImplementationGenerator.new(name: @name, tools: @tools)
+      implementation = generator.generate
 
       File.write(executable_path, implementation)
       File.chmod(0o755, executable_path)
+    end
+
+    class ImplementationGenerator
+      def initialize(name:, tools:)
+        @name = name
+        @tools = tools
+      end
+
+      def generate
+        <<~RUBY
+          #!/usr/bin/env ruby
+
+          require "mcp"
+          require "mcp/transports/stdio"
+
+          tools = []
+          #{generate_tools_code}
+
+          server = MCP::Server.new(name: "#{@name}", tools: tools)
+          MCP::Transports::StdioTransport.new(server).open
+        RUBY
+      end
+
+      private
+
+      def generate_tools_code
+        @tools.map { |tool|
+          <<~RUBY
+            tools << MCP::Tool.define(
+              name: #{tool[:name].inspect},
+              description: #{tool[:description].inspect},
+              input_schema: #{tool[:inputSchema].inspect}
+            ) do |args|
+              MCP::Tool::Response.new([{ type: "text", text: "OK" }])
+            end
+          RUBY
+        }.join("\n")
+      end
     end
   end
 end
