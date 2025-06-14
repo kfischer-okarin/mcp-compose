@@ -18,6 +18,14 @@ module AcceptanceTestUtils
       current = current.parent until (current / "Gemfile").exist?
       current
     end
+
+    def line_processing_pipe(&block)
+      read_pipe, write_pipe = IO.pipe
+      Thread.new do
+        read_pipe.each_line(&block)
+      end
+      write_pipe
+    end
   end
 
   private
@@ -36,7 +44,13 @@ module AcceptanceTestUtils
       server_log_level = ENV["ACCEPTANCE_TEST_LOGS"] ? "debug" : "warn"
       args << "--log-level=#{server_log_level}"
 
-      stream = IO.popen(args, "r+", chdir: @base_dir)
+      @error_logs = +""
+      capture_stderr_pipe = AcceptanceTestUtils.line_processing_pipe do |line|
+        warn "STDERR: #{line}"
+        @error_logs << line
+      end
+
+      stream = IO.popen(args, "r+", chdir: @base_dir, err: capture_stderr_pipe)
 
       logger = ENV["ACCEPTANCE_TEST_LOGS"] ? Logger.new($stderr) : nil
       @client = MCPCompose::IOClient.new(stream, logger: logger)
