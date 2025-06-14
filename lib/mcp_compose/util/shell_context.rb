@@ -20,16 +20,16 @@ module MCPCompose
       # @raise [FileNotFoundError] if the file does not exist
       def read_file(path)
         File.read(@cwd / path)
-      rescue Errno::ENOENT
-        raise FileNotFoundError, "File not found: #{@cwd / path}"
+      rescue Errno::ENOENT => e
+        raise FileNotFoundError, e.message
       end
 
       # @param command [String] the command to spawn
       # @return [IO] a bidirectional IO object
       def spawn_process(command)
         IO.popen(command, "r+", chdir: @cwd.to_s)
-      rescue Errno::ENOENT
-        raise FileNotFoundError, "Executable not found: #{@cwd / command}"
+      rescue Errno::ENOENT => e
+        raise FileNotFoundError, e.message
       end
     end
   end

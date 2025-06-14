@@ -33,7 +33,7 @@ module MCPCompose
           shell_context.read_file("non_existent_file.txt")
         end
 
-        value(exception.message).must_equal "File not found: #{temp_dir}/non_existent_file.txt"
+        value(exception.message).must_match(/No such file or directory.+#{temp_dir}\/non_existent_file.txt/)
       end
 
       it "can spawn a process and return a bidirectional IO object" do
@@ -53,7 +53,7 @@ module MCPCompose
           shell_context.spawn_process("non_existent_executable")
         end
 
-        value(exception.message).must_equal "Executable not found: #{temp_dir}/non_existent_executable"
+        value(exception.message).must_equal "No such file or directory - non_existent_executable"
       end
     end
   end
