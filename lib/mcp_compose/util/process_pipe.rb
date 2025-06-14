@@ -32,16 +32,17 @@ module MCPCompose
       end
 
       def puts(message)
-        raise ProcessExitedError, "Process has exited" if @exit_status
-
         @stdin.puts(message)
         @stdin.flush
+      rescue Errno::EPIPE
+        raise ProcessExitedError, "Process has exited"
       end
 
       def gets
-        raise ProcessExitedError, "Process has exited" if @exit_status
+        result = @stdout.gets
+        raise ProcessExitedError, "Process has exited" unless result
 
-        @stdout.gets
+        result
       end
 
       # @return [IO] the stderr stream

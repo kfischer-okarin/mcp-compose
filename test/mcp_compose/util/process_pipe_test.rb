@@ -49,13 +49,13 @@ module MCPCompose
       it "raises ProcessExitedError on read/write after the process has exited" do
         pipe = ProcessPipe.new("echo done", cwd: temp_dir)
 
-        sleep 0.1 until pipe.exit_status
+        value(pipe.gets).must_equal "done\n"
 
         assert_raises(ProcessPipe::ProcessExitedError) do
-          pipe.puts "cannot write"
+          pipe.gets
         end
         assert_raises(ProcessPipe::ProcessExitedError) do
-          pipe.gets
+          pipe.puts "cannot write"
         end
       end
     end
