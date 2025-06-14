@@ -12,7 +12,14 @@ module MCPCompose
     # @param command [String] the command to run
     # @param cwd [String] the current working directory
     class ProcessPipe
-      class ProcessExitedError < StandardError; end
+      class ProcessExitedError < StandardError
+        attr_reader :process_pipe
+
+        def initialize(process_pipe, message)
+          @process_pipe = process_pipe
+          super(message)
+        end
+      end
 
       # @return [Integer] the process ID
       attr_reader :pid
@@ -35,12 +42,12 @@ module MCPCompose
         @stdin.puts(message)
         @stdin.flush
       rescue Errno::EPIPE
-        raise ProcessExitedError, "Process has exited"
+        raise ProcessExitedError.new(self, "Process has exited")
       end
 
       def gets
         result = @stdout.gets
-        raise ProcessExitedError, "Process has exited" unless result
+        raise ProcessExitedError.new(self, "Process has exited") unless result
 
         result
       end
